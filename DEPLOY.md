@@ -15,10 +15,10 @@
 
 3. **配置项目**
    - **Framework Preset**: 自动检测为 Nuxt.js
-   - **Root Directory**: `cook` （如果仓库根目录不是项目根目录）
-   - **Build Command**: `npm run build`
+   - **Root Directory**: 留空（项目已在根目录）
+   - **Build Command**: `pnpm run build`（Vercel 会自动检测 pnpm）
    - **Output Directory**: `dist`
-   - **Install Command**: `npm install`
+   - **Install Command**: `pnpm install`
 
 4. **配置环境变量**
    点击 "Environment Variables"，添加以下变量：
