@@ -6,10 +6,10 @@ defineProps<{
 
 <template>
   <button
-    class="tag rounded" p="x-2"
-    border="~ stone-200 dark:stone-600"
-    :bg="active ? 'stone-600 opacity-100' : 'stone-300 opacity-5'"
-    :text="active ? 'stone-100' : 'stone-800 dark:stone-200'"
+    class="tag rounded-lg transition-all duration-200 active:scale-95" p="x-3 y-1"
+    border="~ stone-200 dark:stone-700"
+    :bg="active ? 'stone-600 opacity-100' : 'stone-100 dark:stone-800'"
+    :text="active ? 'white' : 'stone-700 dark:stone-300'"
   >
     <slot />
   </button>

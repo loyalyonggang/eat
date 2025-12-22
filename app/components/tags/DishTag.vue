@@ -37,16 +37,23 @@ const dishLabel = computed(() => {
 
 <template>
   <a
-    :href="dish.link || `https://www.bilibili.com/video/${dish.bv}`" target="_blank" class="dish-tag tag rounded" p="x-2"
+    :href="dish.link || `https://www.bilibili.com/video/${dish.bv}`" target="_blank"
+    class="dish-tag tag rounded-lg transition-all duration-200 active:scale-95 hover:shadow-md block w-full mb-2"
+    p="x-4 y-3"
     border="~ blue-200 dark:blue-800"
-    bg="blue-300 opacity-20"
+    bg="white dark:gray-800 hover:blue-50 dark:hover:blue-900/20"
     @click="triggerGtm(dish)"
   >
-    <span m="r-1" text="sm blue-700 dark:blue-200">
-      {{ dishLabel }}
-    </span>
-    <template v-for="tool, i in tools">
-      <span v-if="dish.tools?.includes(tool.name)" :key="i" :class="tool.icon" />
-    </template>
+    <div class="flex items-center justify-between w-full">
+      <span class="text-base font-medium text-blue-700 dark:text-blue-300 flex-1">
+        {{ dishLabel }}
+      </span>
+      <div class="flex gap-2 ml-2 text-gray-500">
+        <template v-for="tool, i in tools">
+          <span v-if="dish.tools?.includes(tool.name)" :key="i" :class="tool.icon" />
+        </template>
+        <div i-ri-arrow-right-s-line />
+      </div>
+    </div>
   </a>
 </template>

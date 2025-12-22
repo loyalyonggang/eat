@@ -52,10 +52,13 @@ function toggleStuff(item: StuffItem, category = '', _e?: Event) {
 </script>
 
 <template>
-  <div>
-    <h2 m="t-4" text="xl" font="bold" p="1">
-      🥘 先选一下食材
-    </h2>
+  <div class="p-4 pb-24 space-y-6">
+    <div class="flex items-center justify-between">
+      <h2 class="text-xl font-bold flex items-center gap-2">
+        <div class="i-carbon-restaurant" />
+        <span>Una 今天想吃点什么？</span>
+      </h2>
+    </div>
 
     <!-- 食物相克警告提示 -->
     <ion-toast
@@ -92,11 +95,13 @@ function toggleStuff(item: StuffItem, category = '', _e?: Event) {
       </div>
     </ion-toast>
 
-    <div>
-      <h2 opacity="90" text="base" font="bold" p="1">
-        🥬 菜菜们
+    <!-- 蔬菜 -->
+    <section class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+      <h2 class="text-base font-bold mb-3 flex items-center gap-2 text-green-600 dark:text-green-400">
+        <span class="text-xl">🥬</span>
+        <span>菜菜们</span>
       </h2>
-      <div>
+      <div class="flex flex-wrap gap-2">
         <VegetableTag
           v-for="item, i in vegetable" :key="i"
           :active="curStuff.includes(item.name)"
@@ -109,12 +114,15 @@ function toggleStuff(item: StuffItem, category = '', _e?: Event) {
           <span class="inline-flex" m="l-1">{{ item.name }}</span>
         </VegetableTag>
       </div>
-    </div>
-    <div m="y-4">
-      <h2 opacity="90" text="base" font="bold" p="1">
-        🥩 肉肉们
+    </section>
+
+    <!-- 肉类 -->
+    <section class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+      <h2 class="text-base font-bold mb-3 flex items-center gap-2 text-red-500 dark:text-red-400">
+        <span class="text-xl">🥩</span>
+        <span>肉肉们</span>
       </h2>
-      <div>
+      <div class="flex flex-wrap gap-2">
         <MeatTag
           v-for="item, i in meat" :key="i"
           :active="curStuff.includes(item.name)"
@@ -124,12 +132,16 @@ function toggleStuff(item: StuffItem, category = '', _e?: Event) {
           <span m="l-1">{{ item.name }}</span>
         </MeatTag>
       </div>
-    </div>
-    <div m="y-4">
-      <h2 opacity="90" text="base" font="bold" p="1">
-        🍚 主食也要一起下锅吗？（不选也行）
+    </section>
+
+    <!-- 主食 -->
+    <section class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+      <h2 class="text-base font-bold mb-3 flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
+        <span class="text-xl">🍚</span>
+        <span>主食</span>
+        <span class="text-xs font-normal opacity-60 ml-auto">可选</span>
       </h2>
-      <div>
+      <div class="flex flex-wrap gap-2">
         <StapleTag
           v-for="item, i in staple" :key="i"
           :active="curStuff.includes(item.name)"
@@ -139,12 +151,15 @@ function toggleStuff(item: StuffItem, category = '', _e?: Event) {
           <span m="l-1">{{ item.name }}</span>
         </StapleTag>
       </div>
-    </div>
-    <div m="t-4">
-      <h2 text="xl" font="bold" p="1">
-        🍳 再选一下厨具
+    </section>
+
+    <!-- 厨具 -->
+    <section class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+      <h2 class="text-base font-bold mb-3 flex items-center gap-2 text-gray-600 dark:text-gray-300">
+        <span class="text-xl">🍳</span>
+        <span>厨具</span>
       </h2>
-      <div>
+      <div class="flex flex-wrap gap-2">
         <ToolTag
           v-for="item, i in tools" :key="i"
           :active="curTool === item.name"
@@ -159,7 +174,7 @@ function toggleStuff(item: StuffItem, category = '', _e?: Event) {
           <span class="inline-flex" m="l-1">{{ item.label || item.name }}</span>
         </ToolTag>
       </div>
-    </div>
+    </section>
 
     <RecipePanel ref="recipePanelRef" />
   </div>

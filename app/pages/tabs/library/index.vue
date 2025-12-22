@@ -43,7 +43,16 @@ async function runSearch(q: string) {
   loading.value = true
   try {
     recipes.value = await db.recipes
-      .filter(r => r.name.includes(text))
+      .filter((r) => {
+        const t = text.toLowerCase()
+        return !!(
+          r.name?.toLowerCase().includes(t)
+          || (r.tags && r.tags.some(tag => tag.toLowerCase().includes(t)))
+          || (r.stuff && r.stuff.some(s => s.toLowerCase().includes(t)))
+          || (r.tools && r.tools.some(tool => tool.toLowerCase().includes(t)))
+          || (r.difficulty && r.difficulty.toLowerCase().includes(t))
+        )
+      })
       .toArray()
   }
   finally {
@@ -51,14 +60,41 @@ async function runSearch(q: string) {
   }
 }
 
+const route = useRoute()
+const router = useRouter()
+
 onMounted(async () => {
   // ensure IndexedDB has data
   const { init } = useIndexedDB()
   await init()
-  await loadAll()
+  
+  // Check for query param
+  const q = route.query.q as string
+  if (q) {
+    keyword.value = q
+    await runSearch(q)
+  } else {
+    await loadAll()
+  }
 })
 
+// Watch URL query changes (e.g. navigation from other tabs)
+watch(
+  () => route.query.q,
+  async (newQ) => {
+    const q = (newQ as string) || ''
+    if (q !== keyword.value) {
+      keyword.value = q
+      await runSearch(q)
+    }
+  }
+)
+
 watchDebounced(keyword, (q) => {
+  // Update URL to reflect current search
+  if (q !== route.query.q) {
+    router.replace({ query: { ...route.query, q: q || undefined } })
+  }
   runSearch(q)
 }, { debounce: 200, maxWait: 500 })
 
@@ -87,10 +123,9 @@ function onToggleFavorite(item: DbRecipeItem) {
 
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
+    <ion-header class="ion-no-border">
+      <ion-toolbar class="bg-transparent">
         <ion-title>菜谱列表</ion-title>
-
         <ion-buttons slot="end">
           <ion-button title="添加菜谱" router-link="/recipes/new">
             <ion-icon slot="icon-only" :icon="ioniconsAddCircleOutline" />
@@ -98,69 +133,101 @@ function onToggleFavorite(item: DbRecipeItem) {
         </ion-buttons>
       </ion-toolbar>
 
-      <ion-toolbar>
+      <div class="px-4 pb-2 bg-gray-50/80 dark:bg-black/80 backdrop-blur-md sticky top-0 z-10">
         <ion-searchbar
+          class="custom-searchbar"
           animated
           placeholder="搜索菜谱"
           :debounce="300"
+          :value="keyword"
           show-clear-button="focus"
           @ion-input="onInput"
           @ion-clear="onClear"
         />
-      </ion-toolbar>
+        
+        <div class="mt-2">
+          <ion-segment
+            :value="view"
+            @ion-change="e => (view = (e.detail.value as 'all' | 'fav') ?? 'all')"
+            class="custom-segment"
+          >
+            <ion-segment-button value="all">
+              <ion-label>全部</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="fav">
+              <ion-label>收藏 ({{ favCount }})</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+        </div>
 
-      <ion-toolbar class="pb-1.5 -mt-2">
-        <ion-segment
-          :value="view"
-          @ion-change="e => (view = (e.detail.value as 'all' | 'fav') ?? 'all')"
-        >
-          <ion-segment-button value="all">
-            <ion-label>全部</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="fav">
-            <ion-label>收藏 ({{ favCount }})</ion-label>
-          </ion-segment-button>
-        </ion-segment>
-      </ion-toolbar>
+        <!-- Category Indicator -->
+        <div v-if="categoryTitle" class="mt-2 flex items-center">
+          <div class="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-sm font-medium flex items-center gap-2 animate-fade-in">
+            <span>正在浏览：{{ categoryTitle }}</span>
+            <button @click="onClear" class="text-green-500 hover:text-green-700 dark:hover:text-green-200">
+              <div i-mdi-close-circle class="text-lg" />
+            </button>
+          </div>
+        </div>
+      </div>
     </ion-header>
 
-    <ion-content>
-      <div v-if="loading" class="ion-padding text-center">
+    <ion-content class="bg-gray-50 dark:bg-black">
+      <div v-if="loading" class="ion-padding text-center mt-8">
         <ion-spinner name="crescent" />
       </div>
 
-      <ion-list v-else-if="displayed.length">
-        <ion-item-sliding v-for="item in displayed" :key="item.id ?? item.name">
-          <ion-item @click="openDishLink(item)">
-            <ion-label class="truncate">
-              <DishLabel class="text-sm" :dish="item" />
-            </ion-label>
-            <ion-button slot="end" fill="clear" @click.stop="onToggleFavorite(item)">
-              <ion-icon :icon="isFavorited(item) ? ioniconsStar : ioniconsStarOutline" color="warning" />
-            </ion-button>
-          </ion-item>
-
-          <ion-item-options>
-            <ion-item-option color="warning" @click="onToggleFavorite(item)">
-              {{ isFavorited(item) ? '取消收藏' : '添加收藏' }}
-            </ion-item-option>
-          </ion-item-options>
-        </ion-item-sliding>
-      </ion-list>
+      <div v-else-if="displayed.length" class="p-4 grid gap-3">
+        <div 
+          v-for="item in displayed" 
+          :key="item.id ?? item.name"
+          class="relative group"
+        >
+          <DishTag :dish="item" class="!mb-0" />
+          
+          <button 
+            class="absolute top-2 right-2 p-2 rounded-full bg-white/80 dark:bg-black/50 backdrop-blur-sm transition-all active:scale-90"
+            :class="isFavorited(item) ? 'text-yellow-500' : 'text-gray-400'"
+            @click.stop="onToggleFavorite(item)"
+          >
+            <ion-icon :icon="isFavorited(item) ? ioniconsStar : ioniconsStarOutline" />
+          </button>
+        </div>
+      </div>
 
       <div
         v-else-if="(keyword || view === 'fav') && displayed.length === 0"
-        class="ion-padding text-center"
+        class="flex flex-col items-center justify-center mt-20 text-gray-400"
       >
-        <ion-note>没有找到相关菜谱</ion-note>
+        <div text="4xl" i-mdi-pot-steam-outline mb-4 />
+        <p>没有找到相关菜谱</p>
       </div>
     </ion-content>
+    
     <ion-toast
       :is-open="showToast"
       :message="toastMessage"
       duration="1200"
       position="top"
       @did-dismiss="showToast = false"
+      class="custom-toast"
     />
   </ion-page>
 </template>
+
+<style scoped>
+.custom-searchbar {
+  --background: rgba(var(--gray-200), 0.5);
+  --border-radius: 12px;
+  --box-shadow: none;
+  padding-inline: 0;
+}
+
+.dark .custom-searchbar {
+  --background: rgba(var(--gray-800), 0.5);
+}
+
+.custom-segment {
+  --background: transparent;
+}
+</style>

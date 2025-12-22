@@ -1,1 +1,1 @@
-export const tabRootPaths = ['/', '/home', '/apps', '/my', '/tabs']
+export const tabRootPaths = ['/', '/home', '/apps', '/chat', '/tabs']

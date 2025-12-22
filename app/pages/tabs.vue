@@ -56,9 +56,9 @@ onMounted(() => {
             <ion-label>Tab 3</ion-label>
           </IonTabButton> -->
 
-          <IonTabButton tab="my" href="/my">
-            <ion-icon :icon="ioniconsPersonCircleOutline" />
-            <ion-label>我的</ion-label>
+          <IonTabButton tab="chat" href="/chat">
+            <ion-icon :icon="ioniconsChatbubbleEllipsesOutline" />
+            <ion-label>聊天</ion-label>
           </IonTabButton>
         </ion-tab-bar>
       </ion-tabs>
