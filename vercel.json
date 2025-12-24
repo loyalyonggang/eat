@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm run convert && pnpm run generate",
+  "buildCommand": "cd scripts && pnpm install && pnpm run convert && cd .. && pnpm run generate",
   "outputDirectory": ".output/public",
   "installCommand": "pnpm install"
 }
