@@ -92,6 +92,10 @@ export default defineNuxtConfig({
       siliconflowModel: process.env.SILICONFLOW_MODEL, // AI模型名称
     },
   },
+  devServer: {
+    port: 3013,
+    host: '0.0.0.0',
+  },
 
   future: {
     compatibilityVersion: 4,
