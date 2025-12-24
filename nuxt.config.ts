@@ -26,6 +26,7 @@ catch (e) {
 }
 
 export default defineNuxtConfig({
+
   modules: [
     '@vueuse/nuxt',
     '@unocss/nuxt',
@@ -85,6 +86,12 @@ export default defineNuxtConfig({
   colorMode: {
     classSuffix: '',
   },
+  runtimeConfig: {
+    private: {
+      siliconflowApiKey: process.env.SILICONFLOW_API_KEY,
+      siliconflowModel: process.env.SILICONFLOW_MODEL, // AI模型名称
+    },
+  },
 
   future: {
     compatibilityVersion: 4,
@@ -100,6 +107,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
 
   nitro: {
+    preset: 'netlify',
     esbuild: {
       options: {
         target: 'esnext',

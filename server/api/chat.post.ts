@@ -2,8 +2,15 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { messages } = body
 
-  const API_KEY = 'sk-seiiooeibrvkxypfbkdfbtpsiyhiuuiobzndjftusbsyumae'
-  const MODEL = 'Qwen/Qwen2.5-7B-Instruct'
+  const { siliconflowApiKey: API_KEY, siliconflowModel: MODEL_NAME } = useRuntimeConfig().private
+  const MODEL = MODEL_NAME || 'Qwen/Qwen2.5-7B-Instruct' // 提供一个默认值，以防环境变量未设置
+
+  if (!API_KEY) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'SiliconFlow API key is not configured',
+    })
+  }
 
   try {
     const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
