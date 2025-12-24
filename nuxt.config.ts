@@ -42,7 +42,7 @@ export default defineNuxtConfig({
     '@nuxt/scripts',
     '@nuxtjs/ionic',
   ],
-  ssr: false,
+  ssr: true,
 
   components: [
     { path: '~/components', pathPrefix: false },
