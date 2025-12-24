@@ -2,6 +2,7 @@
   "buildCommand": "npx tsx scripts/convert.ts && pnpm run generate",
   "outputDirectory": "dist",
   "installCommand": "pnpm install",
+  "framework": null,
   "routes": [
     {
       "handle": "filesystem"
