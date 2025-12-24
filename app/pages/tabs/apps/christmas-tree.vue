@@ -6,12 +6,15 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Una 认识几天了',
+  title: 'Una和花不缺认识几天了',
 })
 
 const startDate = new Date('2025-12-13')
 const currentDate = ref(new Date())
 const daysPassed = ref(0)
+const audioRef = ref<HTMLAudioElement | null>(null)
+const isPlaying = ref(false)
+const showMusicButton = ref(false)
 
 // 计算相识天数
 function calculateDays() {
@@ -19,6 +22,33 @@ function calculateDays() {
   const timeDiff = now.getTime() - startDate.getTime()
   daysPassed.value = Math.floor(timeDiff / (1000 * 3600 * 24))
   currentDate.value = now
+}
+
+// 播放/暂停音乐
+function toggleMusic() {
+  if (audioRef.value) {
+    if (isPlaying.value) {
+      audioRef.value.pause()
+      isPlaying.value = false
+    }
+    else {
+      audioRef.value.play().catch(console.error)
+      isPlaying.value = true
+    }
+  }
+}
+
+// 自动播放音乐
+function autoPlayMusic() {
+  if (audioRef.value) {
+    // 尝试自动播放，如果失败则显示播放按钮
+    audioRef.value.play().then(() => {
+      isPlaying.value = true
+    }).catch(() => {
+      // 自动播放失败，显示播放按钮让用户手动点击
+      showMusicButton.value = true
+    })
+  }
 }
 
 // 雪花和浪漫元素动画数据
@@ -52,11 +82,19 @@ onMounted(() => {
 
   // 每秒更新时间
   timer = setInterval(calculateDays, 1000)
+
+  // 延迟一秒后尝试自动播放音乐
+  setTimeout(() => {
+    autoPlayMusic()
+  }, 1000)
 })
 
 onUnmounted(() => {
   if (timer) {
     clearInterval(timer)
+  }
+  if (audioRef.value) {
+    audioRef.value.pause()
   }
 })
 </script>
@@ -69,12 +107,38 @@ onUnmounted(() => {
           <ion-back-button default-href="/apps" color="light" />
         </ion-buttons>
         <ion-title class="text-white font-bold">
-          Una 认识几天了
+          Una和花不缺认识几天了
         </ion-title>
+        <!-- 音乐控制按钮 -->
+        <ion-buttons slot="end">
+          <ion-button
+            v-if="showMusicButton || isPlaying"
+            fill="clear"
+            color="light"
+            @click="toggleMusic"
+          >
+            <ion-icon
+              :icon="isPlaying ? 'pause' : 'play'"
+              class="text-xl text-white"
+            />
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
     <ion-content class="relative overflow-hidden">
+      <!-- 背景音乐 -->
+      <audio
+        ref="audioRef"
+        loop
+        preload="auto"
+        @play="isPlaying = true"
+        @pause="isPlaying = false"
+      >
+        <source src="/We-Wish-You-a-Merry-Christmas.mp3" type="audio/mpeg">
+        您的浏览器不支持音频播放。
+      </audio>
+
       <!-- 背景渐变 -->
       <div class="absolute inset-0 from-purple-900 via-pink-800 to-indigo-900 bg-gradient-to-b" />
 
@@ -150,7 +214,7 @@ onUnmounted(() => {
         <!-- 倒计时文字 -->
         <div class="mb-8 text-white">
           <h1 class="animate-glow-pulse mb-6 text-3xl text-pink-200 font-bold">
-            我们相识已经
+            Una和花不缺相识已经
           </h1>
 
           <div class="relative">
@@ -182,6 +246,21 @@ onUnmounted(() => {
           <p class="animate-float text-base text-white/70" style="animation-delay: 1s;">
             每一天都是新的回忆 ✨
           </p>
+        </div>
+
+        <!-- 音乐提示 -->
+        <div v-if="isPlaying" class="animate-float mb-4 text-sm text-white/60">
+          🎵 正在播放: We Wish You a Merry Christmas 🎵
+        </div>
+
+        <!-- 手动播放音乐按钮 -->
+        <div v-if="showMusicButton && !isPlaying" class="mb-6">
+          <button
+            class="animate-pulse rounded-full from-pink-500 to-purple-600 bg-gradient-to-r px-6 py-3 text-white shadow-lg transition-all duration-300 hover:shadow-xl"
+            @click="toggleMusic"
+          >
+            🎵 点击播放圣诞音乐 🎵
+          </button>
         </div>
 
         <!-- 装饰爱心 -->
