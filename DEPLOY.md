@@ -13,12 +13,14 @@
    - 选择你的 GitHub 仓库：`loyalyonggang/eat`
    - 点击 "Import"
 
-3. **配置项目**
-   - **Framework Preset**: 自动检测为 Nuxt.js
-   - **Root Directory**: 留空（项目已在根目录）
-   - **Build Command**: `pnpm run convert && pnpm run generate`
+3. **配置项目** ⚠️ **重要：必须正确设置根目录**
+   - **Framework Preset**: Nuxt.js
+   - **Root Directory**: `./` 或 `cook`（如果仓库根目录不是项目根目录，请选择 `cook` 目录）
+   - **Build Command**: `npx tsx scripts/convert.ts && pnpm run generate`
    - **Output Directory**: `.output/public`
    - **Install Command**: `pnpm install`
+
+   ⚠️ **注意**: 如果你的仓库中有 `docs` 目录，Vercel 可能会错误地选择它作为根目录。请务必在 "Root Directory" 中明确指定正确的项目目录。
 
 4. **配置环境变量**
    点击 "Environment Variables"，添加以下变量：
