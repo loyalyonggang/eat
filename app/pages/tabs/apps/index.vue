@@ -6,6 +6,11 @@ definePageMeta({
 useHead({
   title: '发现',
 })
+
+// 打开外部链接
+function openVideoSite() {
+  window.open('https://hbqtv.xzgg.us.kg/', '_blank')
+}
 </script>
 
 <template>
@@ -19,24 +24,35 @@ useHead({
     </ion-header>
     <ion-content class="bg-gray-50 dark:bg-black">
       <div class="grid gap-4 p-4">
-        <!-- Main Feature Card -->
+        <!-- Main Feature Card - Una 今天吃什么 -->
         <div
-          class="cursor-pointer rounded-2xl bg-white p-6 shadow-sm transition-transform active:scale-98 dark:bg-gray-800"
+          class="relative cursor-pointer overflow-hidden rounded-2xl from-orange-500 via-amber-500 to-yellow-500 bg-gradient-to-r p-6 shadow-lg transition-transform active:scale-98"
           @click="$router.push('/apps/random')"
         >
-          <div class="mb-4 flex items-center gap-4">
-            <div class="h-12 w-12 flex items-center justify-center rounded-full bg-orange-100 text-2xl text-orange-500 dark:bg-orange-900/30">
-              <div i-mdi-dice-multiple-outline />
+          <!-- Food decoration -->
+          <div class="absolute right-4 top-2 animate-pulse text-4xl text-white/20">
+            🍽️
+          </div>
+          <div class="absolute bottom-2 left-4 animate-bounce text-2xl text-white/20">
+            🥘
+          </div>
+          <div class="absolute right-8 top-1/2 animate-pulse text-6xl text-white/10">
+            🍳
+          </div>
+
+          <div class="relative z-10 mb-4 flex items-center gap-4">
+            <div class="h-12 w-12 flex items-center justify-center rounded-full bg-white/20 text-2xl text-white">
+              🎲
             </div>
             <div>
-              <h3 class="text-lg text-gray-800 font-bold dark:text-gray-100">
+              <h3 class="text-lg text-white font-bold">
                 Una 今天吃什么
               </h3>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                不知道吃什么？随机选一个
+              <p class="text-sm text-white/80">
+                不知道吃什么？随机选一个 🍽️✨
               </p>
             </div>
-            <div class="ml-auto text-gray-400">
+            <div class="ml-auto text-white/80">
               <div i-ri-arrow-right-s-line class="text-2xl" />
             </div>
           </div>
@@ -79,7 +95,7 @@ useHead({
         <!-- Una Video Card -->
         <div
           class="relative cursor-pointer overflow-hidden rounded-2xl from-blue-600 via-cyan-500 to-teal-500 bg-gradient-to-r p-6 shadow-lg transition-transform active:scale-98"
-          @click="window.open('https://hbqtv.xzgg.us.kg/', '_blank')"
+          @click="openVideoSite"
         >
           <!-- Video decoration -->
           <div class="absolute right-4 top-2 animate-pulse text-4xl text-white/20">
