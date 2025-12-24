@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm -C scripts run convert && pnpm run generate",
+  "buildCommand": "npx tsx scripts/convert.ts && pnpm run generate",
   "outputDirectory": ".output/public",
   "installCommand": "pnpm install"
 }
