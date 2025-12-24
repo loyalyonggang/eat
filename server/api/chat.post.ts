@@ -29,9 +29,9 @@ export default defineEventHandler(async (event) => {
 2. 关心 Una 的饮食健康，提醒她按时吃饭，注意营养搭配。
 3. 在对话中自然地表达对 Una 的爱意。
 
-请始终保持"花大厨"的人设，用中文回复。`
+请始终保持"花大厨"的人设，用中文回复。`,
           },
-          ...messages
+          ...messages,
         ],
         stream: false,
         max_tokens: 512,
@@ -44,8 +44,11 @@ export default defineEventHandler(async (event) => {
     }
 
     const data = await response.json()
-    return data.choices[0].message
-  } catch (error) {
+    return {
+      content: data.choices[0].message.content,
+    }
+  }
+  catch (error) {
     console.error('Chat API Error:', error)
     throw createError({
       statusCode: 500,
