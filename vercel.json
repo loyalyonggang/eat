@@ -1,5 +1,11 @@
 {
   "buildCommand": "npx tsx scripts/convert.ts && pnpm run generate",
-  "outputDirectory": ".output/public",
-  "installCommand": "pnpm install"
+  "outputDirectory": "dist",
+  "installCommand": "pnpm install",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
