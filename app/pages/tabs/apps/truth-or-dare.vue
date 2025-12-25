@@ -88,7 +88,7 @@ function generateFloatingHearts() {
     animationDelay: Math.random() * 3,
     animationDuration: 3 + Math.random() * 4,
     size: 0.8 + Math.random() * 1,
-    emoji: hearts[Math.floor(Math.random() * hearts.length)],
+    emoji: hearts[Math.floor(Math.random() * hearts.length)] || '💕',
   }))
 }
 
@@ -101,31 +101,37 @@ function startGame() {
 // 选择真心话
 function chooseTruth() {
   const randomIndex = Math.floor(Math.random() * truthQuestions.length)
-  currentQuestion.value = truthQuestions[randomIndex]
-  gameState.value = 'truth'
+  const question = truthQuestions[randomIndex]
+  if (question) {
+    currentQuestion.value = question
+    gameState.value = 'truth'
 
-  // 记录到历史
-  gameHistory.value.push({
-    player: playerTurn.value === 'una' ? 'Una' : '花不缺',
-    type: 'truth',
-    content: currentQuestion.value,
-    timestamp: new Date(),
-  })
+    // 记录到历史
+    gameHistory.value.push({
+      player: playerTurn.value === 'una' ? 'Una' : '花不缺',
+      type: 'truth',
+      content: question,
+      timestamp: new Date(),
+    })
+  }
 }
 
 // 选择大冒险
 function chooseDare() {
   const randomIndex = Math.floor(Math.random() * dareActions.length)
-  currentDare.value = dareActions[randomIndex]
-  gameState.value = 'dare'
+  const dare = dareActions[randomIndex]
+  if (dare) {
+    currentDare.value = dare
+    gameState.value = 'dare'
 
-  // 记录到历史
-  gameHistory.value.push({
-    player: playerTurn.value === 'una' ? 'Una' : '花不缺',
-    type: 'dare',
-    content: currentDare.value,
-    timestamp: new Date(),
-  })
+    // 记录到历史
+    gameHistory.value.push({
+      player: playerTurn.value === 'una' ? 'Una' : '花不缺',
+      type: 'dare',
+      content: dare,
+      timestamp: new Date(),
+    })
+  }
 }
 
 // 完成任务，切换玩家
@@ -154,16 +160,16 @@ onMounted(() => {
     <CustomHeader
       title="真心话大冒险"
       :show-back-button="true"
-      :transparent="true"
+      back-href="/apps"
     >
       <template #end-buttons>
         <ion-button
           v-if="gameState !== 'start'"
           fill="clear"
-          color="light"
+          class="header-button"
           @click="restartGame"
         >
-          <ion-icon name="refresh" class="text-xl text-white" />
+          <ion-icon name="refresh" class="text-xl" />
         </ion-button>
       </template>
     </CustomHeader>
@@ -171,6 +177,22 @@ onMounted(() => {
     <ion-content class="relative overflow-hidden">
       <!-- 背景渐变 -->
       <div class="absolute inset-0 from-pink-600 via-rose-500 to-red-600 bg-gradient-to-br" />
+
+      <!-- 装饰性元素 -->
+      <div class="pointer-events-none absolute inset-0">
+        <div class="absolute left-10 top-10 animate-pulse text-4xl text-white/20">
+          💕
+        </div>
+        <div class="absolute right-16 top-20 animate-bounce text-3xl text-white/20">
+          💖
+        </div>
+        <div class="absolute bottom-32 left-20 animate-pulse text-5xl text-white/20">
+          ❤️
+        </div>
+        <div class="absolute bottom-20 right-10 animate-bounce text-3xl text-white/20">
+          💝
+        </div>
+      </div>
 
       <!-- 浮动爱心动画 -->
       <div class="pointer-events-none absolute inset-0">
@@ -432,12 +454,32 @@ onMounted(() => {
 @keyframes glow-pulse {
   0%,
   100% {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    text-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
   }
   50% {
     text-shadow:
-      0 0 25px rgba(255, 255, 255, 0.8),
-      0 0 35px rgba(255, 255, 255, 0.6);
+      0 0 25px rgba(236, 72, 153, 0.8),
+      0 0 35px rgba(236, 72, 153, 0.6);
+  }
+}
+
+.header-button {
+  --color: #6b7280;
+  --color-hover: #ec4899;
+  margin-right: 8px;
+}
+
+.header-button:hover {
+  --color: #ec4899;
+}
+
+@media (prefers-color-scheme: dark) {
+  .header-button {
+    --color: #9ca3af;
+  }
+
+  .header-button:hover {
+    --color: #ec4899;
   }
 }
 </style>

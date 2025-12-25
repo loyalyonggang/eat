@@ -14,26 +14,43 @@ const rStore = useRecipeStore()
 
 <template>
   <ion-page>
-    <ion-header class="ion-no-border">
-      <ion-toolbar class="bg-transparent">
-        <ion-title>
-          <button
-            class="m-auto flex cursor-pointer items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition hover:bg-gray-100 active:scale-95 dark:hover:bg-gray-800"
-            title="重置"
-            @click="rStore.reset"
-          >
-            <div v-if="rStore.selectedStuff.length" class="text-green-600" i-mdi-pot-steam-outline />
-            <div v-else class="text-gray-500" i-mdi-pot-mix-outline />
-
-            <span>
-              Una 今天吃点什么？
-            </span>
-          </button>
-        </ion-title>
-      </ion-toolbar>
-    </ion-header>
+    <CustomHeader title="Una 今天吃点什么？">
+      <template #end-buttons>
+        <ion-button
+          fill="clear"
+          class="reset-button"
+          title="重置"
+          @click="rStore.reset"
+        >
+          <div v-if="rStore.selectedStuff.length" class="text-green-600" i-mdi-pot-steam-outline />
+          <div v-else class="text-gray-500" i-mdi-pot-mix-outline />
+        </ion-button>
+      </template>
+    </CustomHeader>
     <ion-content ref="ionContentRef" class="bg-gray-50 dark:bg-black">
       <ChooseFood />
     </ion-content>
   </ion-page>
 </template>
+
+<style scoped>
+.reset-button {
+  --color: #6b7280;
+  --color-hover: #ec4899;
+  margin-right: 8px;
+}
+
+.reset-button:hover {
+  --color: #ec4899;
+}
+
+@media (prefers-color-scheme: dark) {
+  .reset-button {
+    --color: #9ca3af;
+  }
+
+  .reset-button:hover {
+    --color: #ec4899;
+  }
+}
+</style>

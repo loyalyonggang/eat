@@ -5,7 +5,6 @@ import { watchDebounced } from '@vueuse/core'
 import { computed, onMounted, ref } from 'vue'
 import { useIndexedDB } from '~/composables/db'
 import { isFavorited, toggleFavorite } from '~/composables/store/favorite'
-import { recipeHistories } from '~/composables/store/history'
 import { db } from '~/utils/db'
 
 definePageMeta({
@@ -67,13 +66,14 @@ onMounted(async () => {
   // ensure IndexedDB has data
   const { init } = useIndexedDB()
   await init()
-  
+
   // Check for query param
   const q = route.query.q as string
   if (q) {
     keyword.value = q
     await runSearch(q)
-  } else {
+  }
+  else {
     await loadAll()
   }
 })
@@ -87,7 +87,7 @@ watch(
       keyword.value = q
       await runSearch(q)
     }
-  }
+  },
 )
 
 watchDebounced(keyword, (q) => {
@@ -107,13 +107,6 @@ function onClear() {
   keyword.value = ''
 }
 
-function openDishLink(dish: DbRecipeItem) {
-  // keep history like DishTag did
-  recipeHistories.value.push({ recipe: dish, time: Date.now() })
-  const href = dish.link || `https://www.bilibili.com/video/${dish.bv}`
-  window.open(href, '_blank')
-}
-
 function onToggleFavorite(item: DbRecipeItem) {
   toggleFavorite(item)
   toastMessage.value = isFavorited(item) ? '已添加到收藏' : '已从收藏移除'
@@ -123,70 +116,67 @@ function onToggleFavorite(item: DbRecipeItem) {
 
 <template>
   <ion-page>
-    <ion-header class="ion-no-border">
-      <ion-toolbar class="bg-transparent">
-        <ion-title>菜谱列表</ion-title>
-        <ion-buttons slot="end">
-          <ion-button title="添加菜谱" router-link="/recipes/new">
-            <ion-icon slot="icon-only" :icon="ioniconsAddCircleOutline" />
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
+    <CustomHeader title="菜谱列表">
+      <template #end-buttons>
+        <ion-button title="添加菜谱" router-link="/recipes/new" fill="clear">
+          <ion-icon slot="icon-only" :icon="ioniconsAddCircleOutline" />
+        </ion-button>
+      </template>
+    </CustomHeader>
 
-      <div class="px-4 pb-2 bg-gray-50/80 dark:bg-black/80 backdrop-blur-md sticky top-0 z-10">
-        <ion-searchbar
-          class="custom-searchbar"
-          animated
-          placeholder="搜索菜谱"
-          :debounce="300"
-          :value="keyword"
-          show-clear-button="focus"
-          @ion-input="onInput"
-          @ion-clear="onClear"
-        />
-        
-        <div class="mt-2">
-          <ion-segment
-            :value="view"
-            @ion-change="e => (view = (e.detail.value as 'all' | 'fav') ?? 'all')"
-            class="custom-segment"
-          >
-            <ion-segment-button value="all">
-              <ion-label>全部</ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="fav">
-              <ion-label>收藏 ({{ favCount }})</ion-label>
-            </ion-segment-button>
-          </ion-segment>
-        </div>
+    <div class="sticky top-0 z-10 bg-gray-50/80 px-4 pb-2 backdrop-blur-md dark:bg-black/80">
+      <ion-searchbar
+        class="custom-searchbar"
+        animated
+        placeholder="搜索菜谱"
+        :debounce="300"
+        :value="keyword"
+        show-clear-button="focus"
+        @ion-input="onInput"
+        @ion-clear="onClear"
+      />
 
-        <!-- Category Indicator -->
-        <div v-if="categoryTitle" class="mt-2 flex items-center">
-          <div class="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-sm font-medium flex items-center gap-2 animate-fade-in">
-            <span>正在浏览：{{ categoryTitle }}</span>
-            <button @click="onClear" class="text-green-500 hover:text-green-700 dark:hover:text-green-200">
-              <div i-mdi-close-circle class="text-lg" />
-            </button>
-          </div>
+      <div class="mt-2">
+        <ion-segment
+          :value="view"
+          class="custom-segment"
+          @ion-change="e => (view = (e.detail.value as 'all' | 'fav') ?? 'all')"
+        >
+          <ion-segment-button value="all">
+            <ion-label>全部</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="fav">
+            <ion-label>收藏 ({{ favCount }})</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </div>
+
+      <!-- Category Indicator -->
+      <div v-if="categoryTitle" class="mt-2 flex items-center">
+        <div class="flex animate-fade-in items-center gap-2 rounded-lg bg-green-100 px-3 py-1.5 text-sm text-green-700 font-medium dark:bg-green-900/30 dark:text-green-300">
+          <span>正在浏览：{{ categoryTitle }}</span>
+          <button class="text-green-500 hover:text-green-700 dark:hover:text-green-200" @click="onClear">
+            <div i-mdi-close-circle class="text-lg" />
+          </button>
         </div>
       </div>
-    </ion-header>
+    </div>
 
     <ion-content class="bg-gray-50 dark:bg-black">
-      <div v-if="loading" class="ion-padding text-center mt-8">
+      <div v-if="loading" class="ion-padding mt-8 text-center">
         <ion-spinner name="crescent" />
       </div>
 
-      <div v-else-if="displayed.length" class="p-4 grid gap-3">
-        <div 
-          v-for="item in displayed" 
+      <div v-else-if="displayed.length" class="grid gap-3 p-4">
+        <div
+          v-for="item in displayed"
           :key="item.id ?? item.name"
-          class="relative group"
+          class="group relative"
         >
           <DishTag :dish="item" class="!mb-0" />
-          
-          <button 
-            class="absolute top-2 right-2 p-2 rounded-full bg-white/80 dark:bg-black/50 backdrop-blur-sm transition-all active:scale-90"
+
+          <button
+            class="absolute right-2 top-2 rounded-full bg-white/80 p-2 backdrop-blur-sm transition-all active:scale-90 dark:bg-black/50"
             :class="isFavorited(item) ? 'text-yellow-500' : 'text-gray-400'"
             @click.stop="onToggleFavorite(item)"
           >
@@ -197,20 +187,20 @@ function onToggleFavorite(item: DbRecipeItem) {
 
       <div
         v-else-if="(keyword || view === 'fav') && displayed.length === 0"
-        class="flex flex-col items-center justify-center mt-20 text-gray-400"
+        class="mt-20 flex flex-col items-center justify-center text-gray-400"
       >
         <div text="4xl" i-mdi-pot-steam-outline mb-4 />
         <p>没有找到相关菜谱</p>
       </div>
     </ion-content>
-    
+
     <ion-toast
       :is-open="showToast"
       :message="toastMessage"
       duration="1200"
       position="top"
-      @did-dismiss="showToast = false"
       class="custom-toast"
+      @did-dismiss="showToast = false"
     />
   </ion-page>
 </template>

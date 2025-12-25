@@ -73,34 +73,29 @@ function openDishLink(item: DbRecipeItem) {
 
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/my" />
-        </ion-buttons>
-        <ion-title>我的收藏</ion-title>
+    <CustomHeader title="我的收藏" :show-back-button="true" back-href="/my">
+      <template #end-buttons>
+        <ion-button title="清空收藏" fill="clear" @click="clearAllFavorites">
+          <ion-icon slot="icon-only" :icon="ioniconsTrashOutline" />
+        </ion-button>
+      </template>
+    </CustomHeader>
 
-        <ion-buttons slot="end">
-          <ion-button title="清空收藏" @click="clearAllFavorites">
-            <ion-icon slot="icon-only" :icon="ioniconsTrashOutline" />
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
+    <div class="sticky top-0 z-10 bg-gray-50/80 px-4 pb-2 backdrop-blur-md dark:bg-black/80">
+      <ion-searchbar
+        animated
+        placeholder="搜索收藏"
+        :debounce="300"
+        show-clear-button="focus"
+        class="custom-searchbar"
+        @ion-input="(ev: IonSearchbarCustomEvent<SearchbarInputEventDetail>) => (keyword = ev.detail.value ?? '')"
+        @ion-clear="keyword = ''"
+      />
 
-      <ion-toolbar>
-        <ion-searchbar
-          animated
-          placeholder="搜索收藏"
-          :debounce="300"
-          show-clear-button="focus"
-          @ion-input="(ev: IonSearchbarCustomEvent<SearchbarInputEventDetail>) => (keyword = ev.detail.value ?? '')"
-          @ion-clear="keyword = ''"
-        />
-      </ion-toolbar>
-
-      <ion-toolbar class="pb-1.5 -mt-2">
+      <div class="mt-2">
         <ion-segment
           :value="sortKey"
+          class="custom-segment"
           @ion-change="e => (sortKey = (e.detail.value as 'time' | 'name') ?? 'time')"
         >
           <ion-segment-button value="time">
@@ -110,8 +105,8 @@ function openDishLink(item: DbRecipeItem) {
             <ion-label>按名称</ion-label>
           </ion-segment-button>
         </ion-segment>
-      </ion-toolbar>
-    </ion-header>
+      </div>
+    </div>
 
     <ion-content>
       <div v-if="loading" class="ion-padding text-center">
@@ -141,3 +136,20 @@ function openDishLink(item: DbRecipeItem) {
     </ion-content>
   </ion-page>
 </template>
+
+<style scoped>
+.custom-searchbar {
+  --background: rgba(var(--gray-200), 0.5);
+  --border-radius: 12px;
+  --box-shadow: none;
+  padding-inline: 0;
+}
+
+.dark .custom-searchbar {
+  --background: rgba(var(--gray-800), 0.5);
+}
+
+.custom-segment {
+  --background: transparent;
+}
+</style>

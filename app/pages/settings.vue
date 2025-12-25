@@ -10,19 +10,7 @@ definePageMeta({
 
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/my" />
-        </ion-buttons>
-        <ion-title>设置</ion-title>
-        <!-- <ion-buttons slot="end">
-          <ion-button color="dark">
-            <ion-icon slot="icon-only" :icon="ioniconsPersonCircleOutline" />
-          </ion-button>
-        </ion-buttons> -->
-      </ion-toolbar>
-    </ion-header>
+    <CustomHeader title="设置" :show-back-button="true" back-href="/my" />
 
     <ion-content>
       <ion-list-header>外观</ion-list-header>

@@ -19,7 +19,7 @@ const MUSIC_URL = 'https://music.163.com/song/media/outer/url?id=4884294.mp3' //
 onMounted(() => {
   audio.value = new Audio(MUSIC_URL)
   audio.value.loop = true
-  
+
   // Auto play might be blocked, so we show a button or try to play
   // simple interaction to start
   setTimeout(() => {
@@ -34,12 +34,14 @@ onUnmounted(() => {
   }
 })
 
-const toggleMusic = () => {
-  if (!audio.value) return
-  
+function toggleMusic() {
+  if (!audio.value)
+    return
+
   if (isPlaying.value) {
     audio.value.pause()
-  } else {
+  }
+  else {
     audio.value.play().catch(() => {
       // Playback failed, likely due to browser autoplay policy
     })
@@ -50,53 +52,52 @@ const toggleMusic = () => {
 
 <template>
   <ion-page>
-    <ion-header class="ion-no-border">
-      <ion-toolbar class="bg-transparent">
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/apps" text="" color="light" />
-        </ion-buttons>
-        <ion-title class="text-white">Una 的圣诞树 🎄</ion-title>
-      </ion-toolbar>
-    </ion-header>
+    <CustomHeader title="Una 的圣诞树 🎄" :show-back-button="true" back-href="/apps" :transparent="true" />
 
     <ion-content class="christmas-bg" :scroll-y="false">
-      <div class="h-full w-full relative flex flex-col items-center justify-center overflow-hidden">
+      <div class="relative h-full w-full flex flex-col items-center justify-center overflow-hidden">
         <!-- Snow Effect -->
         <div class="snowflakes" aria-hidden="true">
-          <div v-for="n in 10" :key="n" class="snowflake">❅</div>
+          <div v-for="n in 10" :key="n" class="snowflake">
+            ❅
+          </div>
         </div>
 
         <!-- Tree Container -->
         <div class="tree-container relative z-10 mt-10">
-          <div class="star">⭐</div>
-          <div class="tree-layer top"></div>
-          <div class="tree-layer middle"></div>
-          <div class="tree-layer bottom"></div>
-          <div class="trunk"></div>
-          
+          <div class="star">
+            ⭐
+          </div>
+          <div class="tree-layer top" />
+          <div class="tree-layer middle" />
+          <div class="tree-layer bottom" />
+          <div class="trunk" />
+
           <!-- Ornaments -->
-          <div class="ornament o-1"></div>
-          <div class="ornament o-2"></div>
-          <div class="ornament o-3"></div>
-          <div class="ornament o-4"></div>
-          <div class="ornament o-5"></div>
-          
+          <div class="ornament o-1" />
+          <div class="ornament o-2" />
+          <div class="ornament o-3" />
+          <div class="ornament o-4" />
+          <div class="ornament o-5" />
+
           <!-- Lights -->
           <div class="lights-group">
-            <div v-for="n in 8" :key="n" class="light" :style="`--i:${n}`"></div>
+            <div v-for="n in 8" :key="n" class="light" :style="`--i:${n}`" />
           </div>
         </div>
 
         <!-- Message -->
         <Transition name="fade">
-          <div v-if="showMessage" class="absolute bottom-32 text-center px-6 z-20">
-            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-xl">
-              <h2 class="text-xl font-bold text-white mb-2">Merry Christmas, Una! 🍎</h2>
+          <div v-if="showMessage" class="absolute bottom-32 z-20 px-6 text-center">
+            <div class="border border-white/20 rounded-2xl bg-white/10 p-6 shadow-xl backdrop-blur-md">
+              <h2 class="mb-2 text-xl text-white font-bold">
+                Merry Christmas, Una! 🍎
+              </h2>
               <p class="text-white/90 leading-relaxed">
                 愿你的每一天都像这棵树一样<br>
                 闪闪发光，充满惊喜。<br>
                 记得要好好吃饭，照顾好自己。<br>
-                <span class="text-sm opacity-75 mt-2 block">永远爱你的男朋友</span>
+                <span class="mt-2 block text-sm opacity-75">永远爱你的男朋友</span>
               </p>
             </div>
           </div>
@@ -104,9 +105,9 @@ const toggleMusic = () => {
 
         <!-- Controls -->
         <div class="absolute bottom-10 z-20">
-          <button 
+          <button
+            class="flex items-center gap-2 rounded-full bg-white/20 px-6 py-3 text-white font-medium backdrop-blur transition-all active:scale-95 hover:bg-white/30"
             @click="toggleMusic"
-            class="flex items-center gap-2 px-6 py-3 rounded-full bg-white/20 backdrop-blur text-white font-medium hover:bg-white/30 transition-all active:scale-95"
           >
             <div :class="isPlaying ? 'i-mdi-pause' : 'i-mdi-play'" class="text-xl" />
             <span>{{ isPlaying ? '暂停音乐' : '播放音乐' }}</span>
@@ -150,26 +151,66 @@ const toggleMusic = () => {
   animation-play-state: running, running;
 }
 
-.snowflake:nth-of-type(1) { left: 1%; animation-delay: 0s, 0s; }
-.snowflake:nth-of-type(2) { left: 10%; animation-delay: 1s, 1s; }
-.snowflake:nth-of-type(3) { left: 20%; animation-delay: 6s, .5s; }
-.snowflake:nth-of-type(4) { left: 30%; animation-delay: 4s, 2s; }
-.snowflake:nth-of-type(5) { left: 40%; animation-delay: 2s, 2s; }
-.snowflake:nth-of-type(6) { left: 50%; animation-delay: 8s, 3s; }
-.snowflake:nth-of-type(7) { left: 60%; animation-delay: 6s, 2s; }
-.snowflake:nth-of-type(8) { left: 70%; animation-delay: 2.5s, 1s; }
-.snowflake:nth-of-type(9) { left: 80%; animation-delay: 1s, 0s; }
-.snowflake:nth-of-type(10) { left: 90%; animation-delay: 3s, 1.5s; }
+.snowflake:nth-of-type(1) {
+  left: 1%;
+  animation-delay: 0s, 0s;
+}
+.snowflake:nth-of-type(2) {
+  left: 10%;
+  animation-delay: 1s, 1s;
+}
+.snowflake:nth-of-type(3) {
+  left: 20%;
+  animation-delay: 6s, 0.5s;
+}
+.snowflake:nth-of-type(4) {
+  left: 30%;
+  animation-delay: 4s, 2s;
+}
+.snowflake:nth-of-type(5) {
+  left: 40%;
+  animation-delay: 2s, 2s;
+}
+.snowflake:nth-of-type(6) {
+  left: 50%;
+  animation-delay: 8s, 3s;
+}
+.snowflake:nth-of-type(7) {
+  left: 60%;
+  animation-delay: 6s, 2s;
+}
+.snowflake:nth-of-type(8) {
+  left: 70%;
+  animation-delay: 2.5s, 1s;
+}
+.snowflake:nth-of-type(9) {
+  left: 80%;
+  animation-delay: 1s, 0s;
+}
+.snowflake:nth-of-type(10) {
+  left: 90%;
+  animation-delay: 3s, 1.5s;
+}
 
 @keyframes snowflakes-fall {
-  0% { top: -10%; }
-  100% { top: 100%; }
+  0% {
+    top: -10%;
+  }
+  100% {
+    top: 100%;
+  }
 }
 
 @keyframes snowflakes-shake {
-  0% { transform: translateX(0px); }
-  50% { transform: translateX(80px); }
-  100% { transform: translateX(0px); }
+  0% {
+    transform: translateX(0px);
+  }
+  50% {
+    transform: translateX(80px);
+  }
+  100% {
+    transform: translateX(0px);
+  }
 }
 
 /* Tree Styles */
@@ -198,7 +239,7 @@ const toggleMusic = () => {
   border-right: solid transparent;
   border-bottom: solid #2d5a3f;
   position: absolute;
-  filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.3));
 }
 
 .top {
@@ -245,16 +286,40 @@ const toggleMusic = () => {
   box-shadow: 0 0 5px #ff4d4d;
 }
 
-.o-1 { top: 70px; left: 130px; background: gold; }
-.o-2 { top: 110px; left: 110px; }
-.o-3 { top: 120px; left: 170px; background: cyan; }
-.o-4 { top: 180px; left: 90px; background: orange; }
-.o-5 { top: 190px; left: 190px; }
+.o-1 {
+  top: 70px;
+  left: 130px;
+  background: gold;
+}
+.o-2 {
+  top: 110px;
+  left: 110px;
+}
+.o-3 {
+  top: 120px;
+  left: 170px;
+  background: cyan;
+}
+.o-4 {
+  top: 180px;
+  left: 90px;
+  background: orange;
+}
+.o-5 {
+  top: 190px;
+  left: 190px;
+}
 
 /* Lights Animation */
 @keyframes twinkle {
-  0% { opacity: 0.5; transform: scale(0.9); }
-  100% { opacity: 1; transform: scale(1.1); }
+  0% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 }
 
 .fade-enter-active,

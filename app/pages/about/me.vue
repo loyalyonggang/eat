@@ -4,14 +4,7 @@ import { links } from '~/constants'
 
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/my" />
-        </ion-buttons>
-        <ion-title>关于作者</ion-title>
-      </ion-toolbar>
-    </ion-header>
+    <CustomHeader title="关于作者" :show-back-button="true" back-href="/my" />
 
     <ion-content>
       <ion-list :inset="true">

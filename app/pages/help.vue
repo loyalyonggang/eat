@@ -4,14 +4,7 @@
 
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/my" />
-        </ion-buttons>
-        <ion-title>帮助</ion-title>
-      </ion-toolbar>
-    </ion-header>
+    <CustomHeader title="帮助" :show-back-button="true" back-href="/my" />
 
     <ion-content class="w-full">
       <div class="mx-auto max-w-md w-full rounded-2xl p-2" text-left>

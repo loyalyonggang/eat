@@ -36,20 +36,13 @@ function openDishLink(dish: RecipeItem) {
 
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/my" />
-        </ion-buttons>
-        <ion-title>历史记录</ion-title>
-
-        <ion-buttons slot="end">
-          <ion-button title="清空记录" @click="clearAllHistory">
-            <ion-icon slot="icon-only" :icon="ioniconsTrashOutline" />
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
+    <CustomHeader title="历史记录" :show-back-button="true" back-href="/my">
+      <template #end-buttons>
+        <ion-button title="清空记录" fill="clear" @click="clearAllHistory">
+          <ion-icon slot="icon-only" :icon="ioniconsTrashOutline" />
+        </ion-button>
+      </template>
+    </CustomHeader>
 
     <ion-content>
       <ion-list>

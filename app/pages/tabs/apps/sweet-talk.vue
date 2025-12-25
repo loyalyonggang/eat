@@ -16,6 +16,7 @@ const showLikedPage = ref(false)
 
 // 用户喜好记录 - 使用localStorage持久化
 const likedTalks = ref<string[]>([])
+const dislikedCount = ref(0)
 
 // 精简的土味情话（减少字数，更简洁）
 const allTalks = [
@@ -96,7 +97,12 @@ function shuffleArray(array: string[]) {
   const shuffled = [...array]
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    const temp = shuffled[i]
+    const itemJ = shuffled[j]
+    if (temp && itemJ) {
+      shuffled[i] = itemJ
+      shuffled[j] = temp
+    }
   }
   return shuffled
 }
@@ -111,7 +117,7 @@ function generateFloatingHearts() {
     animationDelay: Math.random() * 2,
     animationDuration: 2 + Math.random() * 2,
     size: 0.8 + Math.random() * 0.6,
-    emoji: hearts[Math.floor(Math.random() * hearts.length)],
+    emoji: hearts[Math.floor(Math.random() * hearts.length)] || '💕',
   }))
 }
 
@@ -134,7 +140,7 @@ function nextCard() {
   }, 150)
 }
 
-// 喜欢动画
+// 喜欢动画 - 向右滑出
 function likeTalk() {
   if (isAnimating.value)
     return
@@ -147,23 +153,41 @@ function likeTalk() {
 
   // 爱心爆炸效果
   generateFloatingHearts()
-  cardAnimation.value = 'like-animation'
+  isAnimating.value = true
+  cardAnimation.value = 'slide-out-right'
 
   setTimeout(() => {
-    nextCard()
-  }, 600)
+    currentIndex.value = (currentIndex.value + 1) % shuffledTalks.value.length
+    cardAnimation.value = 'slide-in-left'
+
+    setTimeout(() => {
+      cardAnimation.value = ''
+      isAnimating.value = false
+    }, 300)
+  }, 300)
 }
 
-// 不喜欢动画
+// 不喜欢动画 - 向左滑出
 function dislikeTalk() {
   if (isAnimating.value)
     return
 
-  cardAnimation.value = 'dislike-animation'
+  // 增加不喜欢计数
+  dislikedCount.value++
+  saveDislikedCount()
+
+  isAnimating.value = true
+  cardAnimation.value = 'slide-out-left'
 
   setTimeout(() => {
-    nextCard()
-  }, 400)
+    currentIndex.value = (currentIndex.value + 1) % shuffledTalks.value.length
+    cardAnimation.value = 'slide-in-right'
+
+    setTimeout(() => {
+      cardAnimation.value = ''
+      isAnimating.value = false
+    }, 300)
+  }, 300)
 }
 
 // 保存喜欢的情话到localStorage
@@ -173,12 +197,24 @@ function saveLikedTalks() {
   }
 }
 
+// 保存不喜欢的计数
+function saveDislikedCount() {
+  if (import.meta.client) {
+    localStorage.setItem('dislikedCount', dislikedCount.value.toString())
+  }
+}
+
 // 加载喜欢的情话
 function loadLikedTalks() {
   if (import.meta.client) {
     const saved = localStorage.getItem('likedTalks')
     if (saved) {
       likedTalks.value = JSON.parse(saved)
+    }
+
+    const dislikedSaved = localStorage.getItem('dislikedCount')
+    if (dislikedSaved) {
+      dislikedCount.value = Number.parseInt(dislikedSaved) || 0
     }
   }
 }
@@ -195,30 +231,72 @@ function removeLikedTalk(talk: string) {
 // 触摸滑动
 let startX = 0
 let startY = 0
+let isDragging = false
+const cardElement = ref<HTMLElement>()
 
 function handleTouchStart(e: TouchEvent) {
-  startX = e.touches[0].clientX
-  startY = e.touches[0].clientY
+  if (e.touches && e.touches[0]) {
+    startX = e.touches[0].clientX
+    startY = e.touches[0].clientY
+    isDragging = true
+  }
+}
+
+function handleTouchMove(e: TouchEvent) {
+  if (!isDragging || isAnimating.value || !e.touches || !e.touches[0] || !cardElement.value)
+    return
+
+  const moveX = e.touches[0].clientX - startX
+  const moveY = e.touches[0].clientY - startY
+
+  // 只处理水平滑动
+  if (Math.abs(moveX) > Math.abs(moveY)) {
+    e.preventDefault()
+
+    // 实时更新卡片位置和旋转
+    const rotation = moveX * 0.1
+    const opacity = 1 - Math.abs(moveX) / 300
+
+    cardElement.value.style.transform = `translateX(${moveX}px) rotate(${rotation}deg)`
+    cardElement.value.style.opacity = `${Math.max(opacity, 0.3)}`
+
+    // 添加颜色提示
+    if (moveX > 50) {
+      cardElement.value.style.borderColor = '#ec4899' // 粉色 - 喜欢
+    }
+    else if (moveX < -50) {
+      cardElement.value.style.borderColor = '#6b7280' // 灰色 - 不喜欢
+    }
+    else {
+      cardElement.value.style.borderColor = 'transparent'
+    }
+  }
 }
 
 function handleTouchEnd(e: TouchEvent) {
-  if (isAnimating.value)
+  if (!isDragging || isAnimating.value || !e.changedTouches || !e.changedTouches[0] || !cardElement.value)
     return
 
+  isDragging = false
   const endX = e.changedTouches[0].clientX
   const endY = e.changedTouches[0].clientY
-  const diffX = startX - endX
+  const diffX = endX - startX // 修正：endX - startX，正值表示向右滑动
   const diffY = startY - endY
 
-  // 水平滑动
+  // 重置卡片样式
+  cardElement.value.style.transform = ''
+  cardElement.value.style.opacity = ''
+  cardElement.value.style.borderColor = ''
+
+  // 水平滑动判断
   if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 80) {
     if (diffX > 0) {
-      // 向左滑动 - 不喜欢
-      dislikeTalk()
-    }
-    else {
       // 向右滑动 - 喜欢
       likeTalk()
+    }
+    else {
+      // 向左滑动 - 不喜欢
+      dislikeTalk()
     }
   }
   // 向上滑动 - 下一张
@@ -239,15 +317,18 @@ onMounted(() => {
     <CustomHeader
       :title="showLikedPage ? '我的喜欢' : '土味情话'"
       :show-back-button="true"
-      :transparent="true"
+      back-href="/apps"
     >
       <template #end-buttons>
         <ion-button
           fill="clear"
-          color="light"
+          class="header-button relative"
           @click="showLikedPage = !showLikedPage"
         >
-          <ion-icon :name="showLikedPage ? 'heart-outline' : 'heart'" class="text-xl text-white" />
+          <ion-icon :name="showLikedPage ? 'heart-outline' : 'heart'" class="text-xl" />
+          <div v-if="likedTalks.length > 0" class="absolute h-5 w-5 flex items-center justify-center rounded-full bg-pink-500 text-xs text-white -right-1 -top-1">
+            {{ likedTalks.length }}
+          </div>
         </ion-button>
       </template>
     </CustomHeader>
@@ -280,16 +361,18 @@ onMounted(() => {
         <div
           class="relative mx-auto max-w-sm w-full"
           @touchstart="handleTouchStart"
+          @touchmove="handleTouchMove"
           @touchend="handleTouchEnd"
         >
           <!-- 主卡片 -->
           <div
-            class="relative min-h-[350px] flex flex-col transform justify-center overflow-hidden rounded-3xl bg-white/95 p-8 shadow-2xl backdrop-blur-sm transition-all duration-300"
+            ref="cardElement"
+            class="relative min-h-[350px] flex flex-col transform justify-center overflow-hidden border-4 border-transparent rounded-3xl bg-white/95 p-8 shadow-2xl backdrop-blur-sm transition-all duration-300"
             :class="{
               'animate-slide-out-left': cardAnimation === 'slide-out-left',
+              'animate-slide-out-right': cardAnimation === 'slide-out-right',
+              'animate-slide-in-left': cardAnimation === 'slide-in-left',
               'animate-slide-in-right': cardAnimation === 'slide-in-right',
-              'animate-like': cardAnimation === 'like-animation',
-              'animate-dislike': cardAnimation === 'dislike-animation',
             }"
           >
             <!-- 卡片头部 -->
@@ -313,30 +396,46 @@ onMounted(() => {
         </div>
 
         <!-- 操作按钮 -->
-        <div class="mx-auto mt-8 max-w-sm w-full flex items-center justify-between">
+        <div class="mx-auto mt-8 max-w-sm w-full flex items-center justify-between px-4">
           <!-- 不喜欢按钮 -->
-          <button
-            :disabled="isAnimating"
-            class="flex items-center gap-2 rounded-full bg-gray-500/80 px-5 py-3 text-white font-bold shadow-lg backdrop-blur-sm transition-all duration-300 hover:bg-gray-600 disabled:opacity-50"
-            @click="dislikeTalk"
-          >
-            <span class="text-xl">😅</span>
-          </button>
+          <div class="flex flex-col items-center">
+            <button
+              :disabled="isAnimating"
+              class="relative h-16 w-16 flex items-center justify-center rounded-full bg-gray-500/90 text-white shadow-xl backdrop-blur-sm transition-all duration-300 active:scale-95 hover:scale-110 hover:bg-gray-600 disabled:opacity-50"
+              @click="dislikeTalk"
+            >
+              <span class="text-2xl">😅</span>
+              <div v-if="dislikedCount > 0" class="absolute h-6 w-6 flex items-center justify-center rounded-full bg-gray-600 text-xs text-white -right-2 -top-2">
+                {{ dislikedCount }}
+              </div>
+            </button>
+            <div class="mt-2 text-xs text-white/70">
+              不喜欢
+            </div>
+          </div>
+
+          <!-- 中间提示 -->
+          <!-- 已删除中间提示文字 -->
 
           <!-- 喜欢按钮 -->
-          <button
-            :disabled="isAnimating"
-            class="flex items-center gap-2 rounded-full bg-pink-500/80 px-5 py-3 text-white font-bold shadow-lg backdrop-blur-sm transition-all duration-300 hover:bg-pink-600 disabled:opacity-50"
-            @click="likeTalk"
-          >
-            <span class="text-xl">💕</span>
-          </button>
+          <div class="flex flex-col items-center">
+            <button
+              :disabled="isAnimating"
+              class="relative h-16 w-16 flex items-center justify-center rounded-full bg-pink-500/90 text-white shadow-xl backdrop-blur-sm transition-all duration-300 active:scale-95 hover:scale-110 hover:bg-pink-600 disabled:opacity-50"
+              @click="likeTalk"
+            >
+              <span class="text-2xl">💕</span>
+              <div v-if="likedTalks.length > 0" class="absolute h-6 w-6 flex items-center justify-center rounded-full bg-pink-600 text-xs text-white -right-2 -top-2">
+                {{ likedTalks.length }}
+              </div>
+            </button>
+            <div class="mt-2 text-xs text-white/70">
+              喜欢
+            </div>
+          </div>
         </div>
 
-        <!-- 滑动提示 -->
-        <div class="mt-4 text-center text-sm text-white/60">
-          👈 左滑不喜欢 · 右滑喜欢 👉
-        </div>
+        <!-- 滑动提示已删除 -->
       </div>
 
       <!-- 喜欢的情话页面 -->
@@ -385,14 +484,25 @@ onMounted(() => {
     opacity: 1;
   }
   100% {
-    transform: translateX(-100%) rotate(-10deg);
+    transform: translateX(-100%) rotate(-15deg);
     opacity: 0;
   }
 }
 
-@keyframes slide-in-right {
+@keyframes slide-out-right {
   0% {
-    transform: translateX(100%) rotate(10deg);
+    transform: translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%) rotate(15deg);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-left {
+  0% {
+    transform: translateX(-100%) rotate(-15deg);
     opacity: 0;
   }
   100% {
@@ -401,29 +511,14 @@ onMounted(() => {
   }
 }
 
-@keyframes like-animation {
+@keyframes slide-in-right {
   0% {
-    transform: scale(1) rotate(0deg);
-  }
-  50% {
-    transform: scale(1.1) rotate(5deg);
-  }
-  100% {
-    transform: scale(1.2) rotate(10deg);
+    transform: translateX(100%) rotate(15deg);
     opacity: 0;
   }
-}
-
-@keyframes dislike-animation {
-  0% {
-    transform: scale(1) rotate(0deg);
-  }
-  50% {
-    transform: scale(0.9) rotate(-5deg);
-  }
   100% {
-    transform: scale(0.8) rotate(-10deg);
-    opacity: 0;
+    transform: translateX(0) rotate(0deg);
+    opacity: 1;
   }
 }
 
@@ -456,16 +551,16 @@ onMounted(() => {
   animation: slide-out-left 0.3s ease-in-out forwards;
 }
 
+.animate-slide-out-right {
+  animation: slide-out-right 0.3s ease-in-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.3s ease-in-out forwards;
+}
+
 .animate-slide-in-right {
   animation: slide-in-right 0.3s ease-in-out forwards;
-}
-
-.animate-like {
-  animation: like-animation 0.6s ease-in-out forwards;
-}
-
-.animate-dislike {
-  animation: dislike-animation 0.4s ease-in-out forwards;
 }
 
 .animate-float-heart {
@@ -474,5 +569,25 @@ onMounted(() => {
 
 .animate-heartbeat {
   animation: heartbeat 2s ease-in-out infinite;
+}
+
+.header-button {
+  --color: #6b7280;
+  --color-hover: #ec4899;
+  margin-right: 8px;
+}
+
+.header-button:hover {
+  --color: #ec4899;
+}
+
+@media (prefers-color-scheme: dark) {
+  .header-button {
+    --color: #9ca3af;
+  }
+
+  .header-button:hover {
+    --color: #ec4899;
+  }
 }
 </style>

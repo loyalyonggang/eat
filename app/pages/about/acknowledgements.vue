@@ -32,14 +32,7 @@ function getPersonKey(person: PersonalAcknowledgement, index: number): string {
 
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/about" />
-        </ion-buttons>
-        <ion-title>致谢</ion-title>
-      </ion-toolbar>
-    </ion-header>
+    <CustomHeader title="致谢" :show-back-button="true" back-href="/about" />
 
     <ion-content>
       <!-- 个人致谢名单 -->
