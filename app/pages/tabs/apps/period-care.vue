@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onUnmounted, ref } from 'vue'
+import { nextTick, onUnmounted, ref } from 'vue'
 
 definePageMeta({
   alias: ['/apps/period-care'],
@@ -8,6 +8,8 @@ definePageMeta({
 useHead({
   title: 'Una 有肚子不疼偏方吗',
 })
+
+const { heavyImpact } = useHaptics()
 
 const isVibrating = ref(false)
 const audioRef = ref<HTMLAudioElement | null>(null)
@@ -20,26 +22,59 @@ const isFullscreen = ref(false)
 async function startComfort() {
   showInstructions.value = true
   isVibrating.value = true
-  isFullscreen.value = true
+
+  // 等待DOM更新
+  await nextTick()
 
   // 进入全屏模式
   try {
-    if (document.documentElement.requestFullscreen) {
-      await document.documentElement.requestFullscreen()
+    const element = document.documentElement
+    if (element.requestFullscreen) {
+      await element.requestFullscreen()
+      isFullscreen.value = true
+    }
+    else if ((element as any).webkitRequestFullscreen) {
+      // Safari支持
+      await (element as any).webkitRequestFullscreen()
+      isFullscreen.value = true
+    }
+    else if ((element as any).msRequestFullscreen) {
+      // IE支持
+      await (element as any).msRequestFullscreen()
+      isFullscreen.value = true
+    }
+    else {
+      // 浏览器不支持全屏，使用伪全屏
+      isFullscreen.value = true
     }
   }
   catch (error) {
     console.error('全屏模式失败:', error)
+    // 即使全屏失败，也显示全屏界面
+    isFullscreen.value = true
   }
 
   // 开始播放音乐
   if (audioRef.value) {
     try {
+      audioRef.value.currentTime = 0
       await audioRef.value.play()
       isPlaying.value = true
     }
     catch (error) {
       console.error('音乐播放失败:', error)
+      // 尝试用户交互后再播放
+      setTimeout(async () => {
+        try {
+          if (audioRef.value) {
+            await audioRef.value.play()
+            isPlaying.value = true
+          }
+        }
+        catch (e) {
+          console.error('延迟播放也失败:', e)
+        }
+      }, 1000)
     }
   }
 
@@ -55,8 +90,16 @@ async function stopComfort() {
 
   // 退出全屏模式
   try {
-    if (document.fullscreenElement && document.exitFullscreen) {
-      await document.exitFullscreen()
+    if (document.fullscreenElement) {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen()
+      }
+      else if ((document as any).webkitExitFullscreen) {
+        await (document as any).webkitExitFullscreen()
+      }
+      else if ((document as any).msExitFullscreen) {
+        await (document as any).msExitFullscreen()
+      }
     }
   }
   catch (error) {
@@ -66,6 +109,7 @@ async function stopComfort() {
   // 停止音乐
   if (audioRef.value) {
     audioRef.value.pause()
+    audioRef.value.currentTime = 0
     isPlaying.value = false
   }
 
@@ -73,24 +117,43 @@ async function stopComfort() {
   stopVibration()
 }
 
-// 开始震动
-function startVibration() {
-  // 检查是否支持震动
-  if ('vibrate' in navigator) {
-    // 持续震动模式：震动1000ms，停止500ms，循环
-    const vibratePattern = () => {
-      navigator.vibrate(1000)
+// 开始震动 - 使用多种方式确保震动工作
+async function startVibration() {
+  // 方法1: 使用Capacitor Haptics (适用于原生应用)
+  const capacitorVibrate = async () => {
+    try {
+      await heavyImpact()
     }
-
-    // 立即开始第一次震动
-    vibratePattern()
-
-    // 设置定时器持续震动
-    vibrationInterval.value = setInterval(vibratePattern, 1500)
+    catch (error) {
+      console.error('Capacitor震动失败:', error)
+    }
   }
-  else {
-    // 设备不支持震动功能
+
+  // 方法2: 使用浏览器Vibration API (适用于PWA)
+  const browserVibrate = () => {
+    if ('vibrate' in navigator) {
+      try {
+        // 强烈震动模式：震动1000ms
+        navigator.vibrate(1000)
+        return true
+      }
+      catch (error) {
+        console.error('浏览器震动失败:', error)
+        return false
+      }
+    }
+    return false
   }
+
+  // 立即开始震动
+  await capacitorVibrate()
+  browserVibrate()
+
+  // 设置持续震动
+  vibrationInterval.value = setInterval(async () => {
+    await capacitorVibrate()
+    browserVibrate()
+  }, 1500) // 每1.5秒震动一次
 }
 
 // 停止震动
@@ -100,15 +163,44 @@ function stopVibration() {
     vibrationInterval.value = null
   }
 
-  // 停止当前震动
+  // 停止浏览器震动
   if ('vibrate' in navigator) {
-    navigator.vibrate(0)
+    try {
+      navigator.vibrate(0)
+    }
+    catch (error) {
+      console.error('停止震动失败:', error)
+    }
   }
 }
+
+// 监听全屏状态变化
+function handleFullscreenChange() {
+  const isCurrentlyFullscreen = !!(
+    document.fullscreenElement
+    || (document as any).webkitFullscreenElement
+    || (document as any).msFullscreenElement
+  )
+
+  if (!isCurrentlyFullscreen && isFullscreen.value) {
+    // 用户手动退出了全屏，停止所有功能
+    stopComfort()
+  }
+}
+
+// 添加全屏监听器
+onMounted(() => {
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+  document.addEventListener('msfullscreenchange', handleFullscreenChange)
+})
 
 // 组件卸载时清理
 onUnmounted(() => {
   stopComfort()
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
+  document.removeEventListener('msfullscreenchange', handleFullscreenChange)
 })
 </script>
 
@@ -159,27 +251,46 @@ onUnmounted(() => {
         </div>
 
         <!-- 主要内容 -->
-        <div class="relative z-10 h-full flex flex-col items-center justify-center">
+        <div class="relative z-10 h-full flex flex-col items-center justify-center px-4">
           <!-- 不疼大字 -->
           <div class="mb-8 text-center">
-            <h1 class="animate-pulse text-8xl text-white font-bold drop-shadow-2xl md:text-9xl">
+            <h1 class="animate-pulse text-6xl text-white font-bold drop-shadow-2xl md:text-9xl sm:text-8xl">
               不疼
             </h1>
           </div>
 
           <!-- 温暖的话语 -->
-          <div class="mb-16 px-8 text-center">
-            <p class="text-sm text-white/80 leading-relaxed italic drop-shadow-lg md:text-base">
+          <div class="mb-16 max-w-md px-4 text-center">
+            <p class="text-sm text-white/90 leading-relaxed italic drop-shadow-lg sm:text-base">
               "你的不舒服，我都想替你承受。虽然不能在你身边，但希望这份温暖能陪伴你。"
             </p>
           </div>
 
+          <!-- 状态指示 -->
+          <div class="mb-8 text-center space-y-3">
+            <div v-if="isPlaying" class="animate-pulse text-white/80">
+              <div class="flex items-center justify-center space-x-2">
+                <span class="text-lg">🎵</span>
+                <span class="text-sm">舒缓音乐播放中</span>
+              </div>
+            </div>
+            <div v-if="isVibrating" class="animate-bounce text-white/80">
+              <div class="flex items-center justify-center space-x-2">
+                <span class="text-lg">📱</span>
+                <span class="text-sm">温柔按摩进行中</span>
+              </div>
+            </div>
+            <div class="text-xs text-white/70">
+              请将手机轻放在肚子上
+            </div>
+          </div>
+
           <!-- 小的停止按钮 -->
           <button
-            class="absolute right-8 top-8 h-16 w-16 flex items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/30"
+            class="fixed right-4 top-4 h-12 w-12 flex items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-all duration-300 sm:right-8 sm:top-8 sm:h-16 sm:w-16 active:scale-95 hover:bg-white/30"
             @click="stopComfort"
           >
-            <span class="text-2xl">⏹️</span>
+            <span class="text-lg sm:text-2xl">⏹️</span>
           </button>
         </div>
       </div>
@@ -288,7 +399,7 @@ onUnmounted(() => {
             </p>
           </div>
 
-          <!-- 状态显示 -->
+          <!-- 功能状态显示 -->
           <div v-if="isVibrating" class="text-center space-y-2">
             <div class="animate-pulse text-pink-500">
               <div class="flex items-center justify-center space-x-2">
@@ -300,6 +411,24 @@ onUnmounted(() => {
               <div class="flex items-center justify-center space-x-2">
                 <span class="text-lg">📱</span>
                 <span class="text-sm">震动按摩进行中</span>
+              </div>
+            </div>
+            <div class="mt-2 text-xs text-gray-500">
+              全屏状态: {{ isFullscreen ? '已启用' : '未启用' }}
+            </div>
+          </div>
+
+          <!-- 设备兼容性提示 -->
+          <div class="border border-blue-100 rounded-2xl from-blue-50 to-indigo-50 bg-gradient-to-r p-4 text-xs text-gray-600">
+            <div class="space-y-1">
+              <div>🔊 音频支持: {{ audioRef ? '✅' : '❌' }}</div>
+              <div>📳 震动支持: {{ 'vibrate' in navigator ? '✅' : '❌' }}</div>
+              <div>🖥️ 全屏支持: {{ 'requestFullscreen' in document.documentElement ? '✅' : '❌' }}</div>
+              <div class="mt-2 text-xs text-gray-500">
+                如果功能不工作，请尝试：<br>
+                1. 确保使用HTTPS访问<br>
+                2. 在手机浏览器中打开<br>
+                3. 允许音频和震动权限
               </div>
             </div>
           </div>
@@ -330,7 +459,37 @@ onUnmounted(() => {
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh; /* 动态视口高度，更好的移动端支持 */
   z-index: 9999;
+  background: linear-gradient(135deg, #ec4899 0%, #f43f5e 50%, #ec4899 100%);
+}
+
+/* 确保全屏模式覆盖所有内容 */
+.fullscreen-mode::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: inherit;
+  z-index: -1;
+}
+
+/* 移动端优化 */
+@media (max-width: 640px) {
+  .fullscreen-mode {
+    /* 确保在移动端完全覆盖 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
 }
 
 .animate-float {
@@ -359,6 +518,29 @@ onUnmounted(() => {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* 隐藏浏览器UI元素在全屏时 */
+.fullscreen-mode {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* PWA全屏支持 */
+@media (display-mode: fullscreen) {
+  .fullscreen-mode {
+    height: 100vh;
+    height: 100dvh;
+  }
+}
+
+@media (display-mode: standalone) {
+  .fullscreen-mode {
+    height: 100vh;
+    height: 100dvh;
   }
 }
 </style>
