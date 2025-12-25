@@ -236,25 +236,21 @@ onMounted(() => {
 
 <template>
   <ion-page>
-    <ion-header class="ion-no-border">
-      <ion-toolbar class="bg-transparent">
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/apps" color="light" />
-        </ion-buttons>
-        <ion-title class="text-white font-bold">
-          {{ showLikedPage ? '我的喜欢' : '土味情话' }}
-        </ion-title>
-        <ion-buttons slot="end">
-          <ion-button
-            fill="clear"
-            color="light"
-            @click="showLikedPage = !showLikedPage"
-          >
-            <ion-icon :name="showLikedPage ? 'heart-outline' : 'heart'" class="text-xl text-white" />
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
+    <CustomHeader
+      :title="showLikedPage ? '我的喜欢' : '土味情话'"
+      :show-back-button="true"
+      :transparent="true"
+    >
+      <template #end-buttons>
+        <ion-button
+          fill="clear"
+          color="light"
+          @click="showLikedPage = !showLikedPage"
+        >
+          <ion-icon :name="showLikedPage ? 'heart-outline' : 'heart'" class="text-xl text-white" />
+        </ion-button>
+      </template>
+    </CustomHeader>
 
     <ion-content class="relative overflow-hidden">
       <!-- 背景渐变 -->

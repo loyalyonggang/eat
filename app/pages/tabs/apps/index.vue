@@ -15,14 +15,9 @@ function openVideoSite() {
 
 <template>
   <ion-page>
-    <ion-header class="ion-no-border">
-      <ion-toolbar class="bg-transparent">
-        <ion-title>
-          发现
-        </ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="bg-gray-50 dark:bg-black">
+    <CustomHeader title="发现" />
+
+    <ion-content class="custom-content bg-gray-50 dark:bg-black">
       <div class="grid gap-4 p-4">
         <!-- Main Feature Card - Una 今天吃什么 -->
         <div
@@ -269,3 +264,10 @@ function openVideoSite() {
     </ion-content>
   </ion-page>
 </template>
+
+<style scoped>
+.custom-content {
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+</style>

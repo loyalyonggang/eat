@@ -151,26 +151,22 @@ onMounted(() => {
 
 <template>
   <ion-page>
-    <ion-header class="ion-no-border">
-      <ion-toolbar class="bg-transparent">
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/apps" color="light" />
-        </ion-buttons>
-        <ion-title class="text-white font-bold">
-          真心话大冒险
-        </ion-title>
-        <ion-buttons slot="end">
-          <ion-button
-            v-if="gameState !== 'start'"
-            fill="clear"
-            color="light"
-            @click="restartGame"
-          >
-            <ion-icon name="refresh" class="text-xl text-white" />
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
+    <CustomHeader
+      title="真心话大冒险"
+      :show-back-button="true"
+      :transparent="true"
+    >
+      <template #end-buttons>
+        <ion-button
+          v-if="gameState !== 'start'"
+          fill="clear"
+          color="light"
+          @click="restartGame"
+        >
+          <ion-icon name="refresh" class="text-xl text-white" />
+        </ion-button>
+      </template>
+    </CustomHeader>
 
     <ion-content class="relative overflow-hidden">
       <!-- 背景渐变 -->
