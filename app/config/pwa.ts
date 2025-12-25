@@ -17,14 +17,14 @@ export const pwa: ModuleOptions = {
     theme_color: '#ffffff',
     icons: [
       {
-        src: 'pwa-192x192.png',
+        src: 'ico.jpg',
         sizes: '192x192',
-        type: 'image/png',
+        type: 'image/jpeg',
       },
       {
-        src: 'pwa-512x512.png',
+        src: 'ico.jpg',
         sizes: '512x512',
-        type: 'image/png',
+        type: 'image/jpeg',
       },
       {
         src: 'maskable-icon.png',

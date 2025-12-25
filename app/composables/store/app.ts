@@ -8,10 +8,22 @@ export const useAppStore = defineStore('app', () => {
   const deferredPrompt = ref<Event | any>()
   const settings = useStorage(`${namespace}:settings`, defaultSettings)
 
+  // PWA相关方法
+  const setDeferredPrompt = (event: any) => {
+    deferredPrompt.value = event
+  }
+
+  const clearDeferredPrompt = () => {
+    deferredPrompt.value = null
+  }
+
   return {
     deferredPrompt,
-
     settings,
+
+    // PWA方法
+    setDeferredPrompt,
+    clearDeferredPrompt,
   }
 })
 

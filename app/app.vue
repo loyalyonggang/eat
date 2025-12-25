@@ -1,8 +1,8 @@
 <script setup lang="ts">
-// import { installPrompt } from './utils/pwa'
 import { isClient } from '@vueuse/core'
 import { useIndexedDB } from '~/composables/db'
 import { appName } from '~/constants'
+import { installPrompt } from './utils/pwa'
 
 // https://nuxt.com/docs/api/composables/use-head
 useHead({
@@ -31,12 +31,12 @@ onMounted(() => {
     indexedDB.init()
   }
 
-  // installPrompt()
+  installPrompt()
 })
 </script>
 
 <template>
-  <!-- <VitePwaManifest /> -->
+  <VitePwaManifest />
   <!-- https://ionic.nuxtjs.org/cookbook/customising-app-vue -->
   <!-- <NuxtLayout>
     <NuxtLoadingIndicator />
@@ -44,5 +44,9 @@ onMounted(() => {
   </NuxtLayout> -->
   <ion-app>
     <ion-router-outlet />
+    <!-- PWA安装提示组件 -->
+    <PWAInstallPrompt />
+    <!-- PWA更新提示组件 -->
+    <PWAUpdatePrompt />
   </ion-app>
 </template>

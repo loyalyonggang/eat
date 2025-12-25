@@ -14,7 +14,7 @@ export function installPrompt() {
     // Prevent the mini-infobar from appearing on mobile
     e.preventDefault()
     // Stash the event so it can be triggered later.
-    app.deferredPrompt = e
+    app.setDeferredPrompt(e)
 
     // Update UI notify the user they can install the PWA
     // showInstallPromotion()
@@ -27,7 +27,7 @@ export function installPrompt() {
     // Hide the app-provided install promotion
     // hideInstallPromotion()
     // Clear the deferredPrompt so it can be garbage collected
-    app.deferredPrompt = null
+    app.clearDeferredPrompt()
     // Optionally, send analytics event to indicate successful install
     // eslint-disable-next-line no-console
     console.log('PWA was installed')

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
+const { lightImpact, successNotification } = useHaptics()
+
 definePageMeta({
   alias: ['/apps/sweet-talk'],
 })
@@ -149,6 +151,8 @@ function likeTalk() {
   if (talk && !likedTalks.value.includes(talk)) {
     likedTalks.value.push(talk)
     saveLikedTalks()
+    // 喜欢时的成功震动反馈
+    successNotification()
   }
 
   // 爱心爆炸效果
@@ -175,6 +179,9 @@ function dislikeTalk() {
   // 增加不喜欢计数
   dislikedCount.value++
   saveDislikedCount()
+
+  // 轻微震动反馈
+  lightImpact()
 
   isAnimating.value = true
   cardAnimation.value = 'slide-out-left'
