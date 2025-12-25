@@ -58,24 +58,24 @@ function openVideoSite() {
           class="relative cursor-pointer overflow-hidden rounded-2xl from-pink-500 via-purple-500 to-indigo-600 bg-gradient-to-r p-6 shadow-lg transition-transform active:scale-98"
           @click="$router.push('/apps/christmas-tree')"
         >
-          <!-- Snowflakes decoration -->
+          <!-- 浪漫装饰 -->
           <div class="absolute right-4 top-2 animate-pulse text-4xl text-white/20">
-            ❄️
+            💕
           </div>
           <div class="absolute bottom-2 left-4 animate-bounce text-2xl text-white/20">
-            ✨
+            💖
           </div>
           <div class="absolute right-8 top-1/2 animate-pulse text-6xl text-white/10">
-            💕
+            💗
           </div>
 
           <div class="relative z-10 mb-4 flex items-center gap-4">
             <div class="h-12 w-12 flex items-center justify-center rounded-full bg-white/20 text-2xl text-white">
-              🎄
+              💕
             </div>
             <div>
               <h3 class="text-lg text-white font-bold">
-                Una 认识几天了
+                Una 相恋几天
               </h3>
               <p class="text-sm text-white/80">
                 时间记录着我们的美好 💕✨
@@ -181,6 +181,40 @@ function openVideoSite() {
               </h3>
               <p class="text-sm text-white/80">
                 100条甜蜜情话等你来听 💌😘
+              </p>
+            </div>
+            <div class="ml-auto text-white/80">
+              <div i-ri-arrow-right-s-line class="text-2xl" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Period Care Card -->
+        <div
+          class="relative cursor-pointer overflow-hidden rounded-2xl from-pink-600 via-rose-500 to-red-500 bg-gradient-to-r p-6 shadow-lg transition-transform active:scale-98"
+          @click="$router.push('/apps/period-care')"
+        >
+          <!-- Period care decoration -->
+          <div class="absolute right-4 top-2 animate-pulse text-4xl text-white/20">
+            🌸
+          </div>
+          <div class="absolute bottom-2 left-4 animate-bounce text-2xl text-white/20">
+            💖
+          </div>
+          <div class="absolute right-8 top-1/2 animate-pulse text-6xl text-white/10">
+            🤗
+          </div>
+
+          <div class="relative z-10 mb-4 flex items-center gap-4">
+            <div class="h-12 w-12 flex items-center justify-center rounded-full bg-white/20 text-2xl text-white">
+              🌺
+            </div>
+            <div>
+              <h3 class="text-lg text-white font-bold">
+                Una 有肚子不疼偏方吗
+              </h3>
+              <p class="text-sm text-white/80">
+                温暖的陪伴和舒缓体验 🌸💖
               </p>
             </div>
             <div class="ml-auto text-white/80">

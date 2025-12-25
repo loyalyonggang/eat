@@ -16,6 +16,7 @@ node_modules
 dist
 .output
 .nuxt
+.netlify
 .env
 .idea/
 .vercel
