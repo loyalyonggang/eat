@@ -1,6 +1,5 @@
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
 import type { StoryContentResponse } from '~/types'
+import { getStoryById } from '../../../utils/stories-store'
 
 /**
  * 获取故事内容 API(需要token)
@@ -40,10 +39,8 @@ export default defineEventHandler(async (event): Promise<StoryContentResponse> =
       })
     }
 
-    // 读取故事数据
-    const dataPath = join(process.cwd(), 'server', 'data', 'stories.json')
-    const data = JSON.parse(readFileSync(dataPath, 'utf-8'))
-    const story = data.stories.find((s: any) => s.id === id)
+    // 从 Netlify Blobs 获取故事
+    const story = await getStoryById(id)
 
     if (!story) {
       throw createError({

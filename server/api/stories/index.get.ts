@@ -1,6 +1,5 @@
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
 import type { StoryListResponse } from '~/types'
+import { getAllStoriesData } from '../../utils/stories-store'
 
 /**
  * 获取故事列表 API
@@ -17,9 +16,8 @@ export default defineEventHandler(async (event): Promise<StoryListResponse> => {
   const publishedOnly = query.published !== 'false'
 
   try {
-    // 读取故事数据
-    const dataPath = join(process.cwd(), 'server', 'data', 'stories.json')
-    const data = JSON.parse(readFileSync(dataPath, 'utf-8'))
+    // 从 Netlify Blobs 读取故事数据
+    const data = await getAllStoriesData()
     let stories = data.stories || []
 
     // 过滤已发布的故事

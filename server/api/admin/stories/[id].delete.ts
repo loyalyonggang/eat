@@ -1,5 +1,4 @@
-import { readFileSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { deleteStory } from '../../../utils/stories-store'
 
 /**
  * 验证管理员token
@@ -34,23 +33,15 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // 读取故事数据
-    const dataPath = join(process.cwd(), 'server', 'data', 'stories.json')
-    const data = JSON.parse(readFileSync(dataPath, 'utf-8'))
-    const storyIndex = data.stories.findIndex((s: any) => s.id === id)
+    // 使用 Netlify Blobs 删除故事
+    const success = await deleteStory(id)
 
-    if (storyIndex === -1) {
+    if (!success) {
       throw createError({
         statusCode: 404,
         message: '故事不存在',
       })
     }
-
-    // 删除故事
-    data.stories.splice(storyIndex, 1)
-
-    // 保存
-    writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf-8')
 
     return {
       success: true,

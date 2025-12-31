@@ -1,6 +1,5 @@
 import type { CreateStoryRequest } from '~/types'
-import { readFileSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { updateStory } from '../../../utils/stories-store'
 
 /**
  * 验证管理员token
@@ -44,40 +43,26 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // 读取故事数据
-    const dataPath = join(process.cwd(), 'server', 'data', 'stories.json')
-    const data = JSON.parse(readFileSync(dataPath, 'utf-8'))
-    const storyIndex = data.stories.findIndex((s: any) => s.id === id)
+    // 使用 Netlify Blobs 更新故事
+    const updatedStory = await updateStory(id, {
+      title: body.title,
+      cover: body.cover,
+      content: body.content,
+      password: body.password,
+      eggs: body.eggs || [],
+      isPublished: body.isPublished,
+    })
 
-    if (storyIndex === -1) {
+    if (!updatedStory) {
       throw createError({
         statusCode: 404,
         message: '故事不存在',
       })
     }
 
-    const story = data.stories[storyIndex]
-    const now = new Date().toISOString()
-
-    // 更新故事
-    data.stories[storyIndex] = {
-      ...story,
-      title: body.title,
-      cover: body.cover,
-      content: body.content,
-      password: body.password,
-      eggs: body.eggs || [],
-      updatedAt: now,
-      publishedAt: body.isPublished && !story.isPublished ? now : story.publishedAt,
-      isPublished: body.isPublished,
-    }
-
-    // 保存
-    writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf-8')
-
     return {
       success: true,
-      story: data.stories[storyIndex],
+      story: updatedStory,
     }
   }
   catch (error: any) {

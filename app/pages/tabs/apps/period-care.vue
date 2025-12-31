@@ -15,7 +15,7 @@ const isVibrating = ref(false)
 const audioRef = ref<HTMLAudioElement | null>(null)
 const isPlaying = ref(false)
 const showInstructions = ref(false)
-const vibrationInterval = ref<NodeJS.Timeout | null>(null)
+const vibrationInterval = ref<number | null>(null)
 const isFullscreen = ref(false)
 
 // 开始不疼功能
@@ -150,7 +150,7 @@ async function startVibration() {
   browserVibrate()
 
   // 设置持续震动
-  vibrationInterval.value = setInterval(async () => {
+  vibrationInterval.value = window.setInterval(async () => {
     await capacitorVibrate()
     browserVibrate()
   }, 1500) // 每1.5秒震动一次
