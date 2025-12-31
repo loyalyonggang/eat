@@ -1,17 +1,17 @@
 /**
  * 数据迁移脚本
  * 将现有的 stories.json 数据迁移到 Netlify Blobs
- * 
+ *
  * 使用方法:
  * 1. 确保已部署到 Netlify
  * 2. 在 Netlify Functions 中运行此脚本
  * 3. 或者在本地使用 netlify dev 运行
  */
 
+import type { StoriesData } from '../../utils/stories-store'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { saveAllStoriesData } from '../utils/stories-store'
-import type { StoriesData } from '../utils/stories-store'
+import { saveAllStoriesData } from '../../utils/stories-store'
 
 export default defineEventHandler(async () => {
   try {
