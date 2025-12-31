@@ -121,6 +121,40 @@ function openVideoSite() {
           </div>
         </div>
 
+        <!-- Una Story Card -->
+        <div
+          class="relative cursor-pointer overflow-hidden rounded-2xl from-emerald-500 via-teal-500 to-cyan-500 bg-gradient-to-r p-6 shadow-lg transition-transform active:scale-98"
+          @click="$router.push('/tabs/apps/stories')"
+        >
+          <!-- Story decoration -->
+          <div class="absolute right-4 top-2 animate-pulse text-4xl text-white/20">
+            📖
+          </div>
+          <div class="absolute bottom-2 left-4 animate-bounce text-2xl text-white/20">
+            📚
+          </div>
+          <div class="absolute right-8 top-1/2 animate-pulse text-6xl text-white/10">
+            ✨
+          </div>
+
+          <div class="relative z-10 mb-4 flex items-center gap-4">
+            <div class="h-12 w-12 flex items-center justify-center rounded-full bg-white/20 text-2xl text-white">
+              📖
+            </div>
+            <div>
+              <h3 class="text-lg text-white font-bold">
+                Una 想听故事吗
+              </h3>
+              <p class="text-sm text-white/80">
+                温馨的睡前故事等你来听 📖✨
+              </p>
+            </div>
+            <div class="ml-auto text-white/80">
+              <div i-ri-arrow-right-s-line class="text-2xl" />
+            </div>
+          </div>
+        </div>
+
         <!-- Truth or Dare Game Card -->
         <div
           class="relative cursor-pointer overflow-hidden rounded-2xl from-rose-500 via-pink-500 to-red-500 bg-gradient-to-r p-6 shadow-lg transition-transform active:scale-98"

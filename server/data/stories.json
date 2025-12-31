@@ -1,0 +1,32 @@
+{
+  "stories": [
+    {
+      "id": "story-1767178112940",
+      "title": "故事1",
+      "content": "故事内容1",
+      "password": "1234",
+      "eggs": [
+        {
+          "id": "egg-1767178092008",
+          "title": "彩蛋标题1",
+          "content": "彩蛋内容1",
+          "icon": "⭐",
+          "triggerType": "hidden-button",
+          "buttonConfig": {
+            "icon": "⭐",
+            "position": "top-left",
+            "hint": "点击发现彩蛋"
+          }
+        }
+      ],
+      "createdAt": "2025-12-31T10:48:32.940Z",
+      "updatedAt": "2025-12-31T10:48:32.940Z",
+      "publishedAt": "2025-12-31T10:48:32.940Z",
+      "isPublished": true
+    }
+  ],
+  "admin": {
+    "username": "admin",
+    "password": "una2025"
+  }
+}

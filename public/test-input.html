@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>输入测试页面</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>输入框测试页面</h1>
+  <p>这是一个简单的测试页面,用于验证输入框是否能正常工作。</p>
+
+  <label for="test1">测试输入框 1:</label>
+  <input type="text" id="test1" placeholder="请在这里输入文字">
+
+  <label for="test2">测试输入框 2:</label>
+  <input type="text" id="test2" placeholder="请在这里输入文字">
+
+  <label for="test3">测试文本框:</label>
+  <textarea id="test3" rows="5" placeholder="请在这里输入多行文字"></textarea>
+
+  <script>
+    console.log('页面已加载');
+    console.log('输入框1:', document.getElementById('test1'));
+    console.log('输入框2:', document.getElementById('test2'));
+    console.log('文本框:', document.getElementById('test3'));
+  </script>
+</body>
+</html>
