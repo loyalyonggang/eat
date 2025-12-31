@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>故事管理 - Una 的故事</title>
+  
+  <!-- Toast UI Editor CSS -->
+  <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+  
   <style>
     * {
       margin: 0;
@@ -98,8 +102,7 @@
       color: #374151;
     }
 
-    input[type="text"],
-    textarea {
+    input[type="text"] {
       width: 100%;
       padding: 12px;
       border: 1px solid #d1d5db;
@@ -109,15 +112,9 @@
       font-family: inherit;
     }
 
-    input[type="text"]:focus,
-    textarea:focus {
+    input[type="text"]:focus {
       border-color: #10b981;
       box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-    }
-
-    textarea {
-      resize: vertical;
-      font-family: 'Courier New', monospace;
     }
 
     .checkbox-group {
@@ -147,6 +144,22 @@
     .button-group {
       display: flex;
       gap: 10px;
+    }
+
+    /* Toast UI Editor 容器 */
+    #editor {
+      min-height: 500px;
+    }
+
+    /* 自定义编辑器样式 */
+    .toastui-editor-defaultUI {
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+    }
+
+    .toastui-editor-defaultUI:focus-within {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
     }
   </style>
 </head>
@@ -198,8 +211,16 @@
       <!-- 故事内容 -->
       <div class="form-section">
         <h2>故事内容 *</h2>
-        <textarea id="content" rows="15" placeholder="在这里编写故事内容,支持 Markdown 格式..."></textarea>
-        <div class="hint">支持 Markdown 格式:标题、粗体、斜体、图片等</div>
+        <div id="editor"></div>
+        <div class="hint" style="margin-top: 12px;">
+          💡 提示:
+          <ul style="margin-top: 8px; padding-left: 20px; line-height: 1.8;">
+            <li>支持 Markdown 格式:标题、粗体、斜体、图片等</li>
+            <li>可以直接粘贴图片(Ctrl+V)</li>
+            <li>点击工具栏的图片按钮可以插入图片</li>
+            <li>切换到"预览"模式查看最终效果</li>
+          </ul>
+        </div>
       </div>
 
       <!-- 彩蛋设置 -->
@@ -219,6 +240,9 @@
     </div>
   </div>
 
+  <!-- Toast UI Editor JS -->
+  <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+
   <script>
     // 获取 URL 参数
     const urlParams = new URLSearchParams(window.location.search);
@@ -228,12 +252,48 @@
     // 彩蛋数据
     let eggs = [];
 
+    // 初始化编辑器
+    let editor;
+
+    function initEditor(initialContent = '') {
+      editor = new toastui.Editor({
+        el: document.querySelector('#editor'),
+        height: '500px',
+        initialEditType: 'markdown',
+        previewStyle: 'vertical',
+        initialValue: initialContent,
+        language: 'zh-CN',
+        toolbarItems: [
+          ['heading', 'bold', 'italic', 'strike'],
+          ['hr', 'quote'],
+          ['ul', 'ol', 'task'],
+          ['table', 'image', 'link'],
+          ['code', 'codeblock'],
+        ],
+        // 图片上传处理
+        hooks: {
+          addImageBlobHook: async (blob, callback) => {
+            // 将图片转换为 base64
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              callback(e.target.result, blob.name);
+            };
+            reader.readAsDataURL(blob);
+          }
+        }
+      });
+    }
+
     // 更新页面标题
     document.getElementById('page-title').textContent = isNew ? '新建故事' : '编辑故事';
 
     // 加载故事数据(编辑模式)
     async function loadStory() {
-      if (isNew) return;
+      if (isNew) {
+        // 新建模式,初始化空编辑器
+        initEditor();
+        return;
+      }
 
       document.getElementById('loading').style.display = 'block';
       document.getElementById('form-container').style.display = 'none';
@@ -253,8 +313,10 @@
         document.getElementById('title').value = data.title || '';
         document.getElementById('cover').value = data.cover || '';
         document.getElementById('password').value = data.password || '';
-        document.getElementById('content').value = data.content || '';
         document.getElementById('published').checked = data.isPublished || false;
+
+        // 初始化编辑器并加载内容
+        initEditor(data.content || '');
 
         // 加载彩蛋
         eggs = (data.eggs || []).map(egg => ({
@@ -338,7 +400,7 @@
 
             <div class="form-group" style="margin: 0;">
               <label style="font-size: 12px; color: #4b5563;">彩蛋内容</label>
-              <textarea id="egg-content-${index}" rows="3" placeholder="彩蛋的具体内容..." onchange="updateEgg(${index}, 'content', this.value)">${escapeHtml(egg.content)}</textarea>
+              <textarea id="egg-content-${index}" rows="3" placeholder="彩蛋的具体内容..." onchange="updateEgg(${index}, 'content', this.value)" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; resize: vertical;">${escapeHtml(egg.content)}</textarea>
             </div>
 
             <div class="form-group" style="margin: 0;">
@@ -390,7 +452,7 @@
     // 保存故事
     async function saveStory() {
       const title = document.getElementById('title').value.trim();
-      const content = document.getElementById('content').value.trim();
+      const content = editor.getMarkdown().trim();
       const password = document.getElementById('password').value.trim();
 
       if (!title) {
@@ -451,6 +513,11 @@
 
     // 取消编辑
     function cancel() {
+      if (editor && editor.getMarkdown().trim()) {
+        if (!confirm('确定要放弃当前编辑的内容吗?')) {
+          return;
+        }
+      }
       window.location.href = '/admin-stories.html';
     }
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { StoryContentResponse, StoryEgg } from '~/types'
+import { marked } from 'marked'
 
 const route = useRoute()
 const router = useRouter()
@@ -16,6 +17,19 @@ const scrolledToBottom = ref(false)
 const currentEgg = ref<StoryEgg | null>(null)
 const showEgg = ref(false)
 const foundEggs = ref<Set<string>>(new Set())
+
+// 配置 marked
+marked.setOptions({
+  breaks: true, // 支持 GFM 换行
+  gfm: true, // 启用 GitHub Flavored Markdown
+})
+
+// 渲染 Markdown 内容
+const renderedContent = computed(() => {
+  if (!story.value?.content)
+    return ''
+  return marked(story.value.content)
+})
 
 // 加载故事内容
 async function loadStory() {
@@ -140,7 +154,7 @@ onMounted(() => {
         </h1>
 
         <!-- 内容 -->
-        <div class="mb-8 text-gray-700 leading-relaxed prose prose-lg dark:text-gray-300 dark:prose-invert" v-html="story.content" />
+        <div class="story-content mb-8" v-html="renderedContent" />
 
         <!-- 故事结束 -->
         <div v-if="scrolledToBottom" class="relative mb-8 rounded-2xl from-emerald-100 to-cyan-100 bg-gradient-to-br p-8 text-center dark:from-emerald-900/20 dark:to-cyan-900/20">
@@ -203,25 +217,224 @@ onMounted(() => {
   --padding-bottom: 0;
 }
 
-/* Markdown 样式 */
-:deep(.prose) {
-  max-width: none;
+/* 故事内容样式 - 优化阅读体验 */
+.story-content {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    'Source Han Sans CN', sans-serif;
+  font-size: 17px;
+  line-height: 2;
+  letter-spacing: 0.05em;
+  color: #333;
 }
 
-:deep(.prose p) {
-  margin-bottom: 1em;
+/* 深色模式 */
+.dark .story-content {
+  color: #e5e5e5;
 }
 
-:deep(.prose h1),
-:deep(.prose h2),
-:deep(.prose h3) {
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-  font-weight: bold;
+/* 标题样式 */
+.story-content :deep(h1) {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 2em 0 1em;
+  line-height: 1.4;
+  color: #1a1a1a;
+  text-align: center;
 }
 
-:deep(.prose img) {
-  border-radius: 1rem;
+.dark .story-content :deep(h1) {
+  color: #f5f5f5;
+}
+
+.story-content :deep(h2) {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 1.8em 0 0.8em;
+  line-height: 1.5;
+  color: #2a2a2a;
+}
+
+.dark .story-content :deep(h2) {
+  color: #e5e5e5;
+}
+
+.story-content :deep(h3) {
+  font-size: 19px;
+  font-weight: 600;
+  margin: 1.5em 0 0.6em;
+  line-height: 1.6;
+  color: #3a3a3a;
+}
+
+.dark .story-content :deep(h3) {
+  color: #d5d5d5;
+}
+
+/* 段落样式 */
+.story-content :deep(p) {
   margin: 1.5em 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+
+/* 第一段不缩进 */
+.story-content :deep(h1 + p),
+.story-content :deep(h2 + p),
+.story-content :deep(h3 + p) {
+  text-indent: 0;
+}
+
+/* 加粗文本 */
+.story-content :deep(strong) {
+  font-weight: 600;
+  color: #000;
+}
+
+.dark .story-content :deep(strong) {
+  color: #fff;
+}
+
+/* 斜体 */
+.story-content :deep(em) {
+  font-style: italic;
+  color: #555;
+}
+
+.dark .story-content :deep(em) {
+  color: #aaa;
+}
+
+/* 图片样式 */
+.story-content :deep(img) {
+  max-width: 100%;
+  height: auto;
+  margin: 2.5em auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  display: block;
+}
+
+.dark .story-content :deep(img) {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* 引用块 */
+.story-content :deep(blockquote) {
+  margin: 1.5em 0;
+  padding: 1em 1.5em;
+  border-left: 4px solid #10b981;
+  background: #f0fdf4;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: #166534;
+}
+
+.dark .story-content :deep(blockquote) {
+  background: #064e3b20;
+  color: #6ee7b7;
+}
+
+/* 列表样式 */
+.story-content :deep(ul),
+.story-content :deep(ol) {
+  margin: 1.5em 0;
+  padding-left: 2em;
+}
+
+.story-content :deep(li) {
+  margin: 0.5em 0;
+  line-height: 1.8;
+}
+
+/* 水平分隔线 */
+.story-content :deep(hr) {
+  margin: 3em 0;
+  border: none;
+  border-top: 2px solid #e5e7eb;
+}
+
+.dark .story-content :deep(hr) {
+  border-top-color: #374151;
+}
+
+/* 代码块 */
+.story-content :deep(code) {
+  padding: 0.2em 0.4em;
+  background: #f3f4f6;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.9em;
+}
+
+.dark .story-content :deep(code) {
+  background: #374151;
+}
+
+.story-content :deep(pre) {
+  margin: 1.5em 0;
+  padding: 1em;
+  background: #f3f4f6;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.dark .story-content :deep(pre) {
+  background: #1f2937;
+}
+
+.story-content :deep(pre code) {
+  padding: 0;
+  background: transparent;
+}
+
+/* 链接样式 */
+.story-content :deep(a) {
+  color: #10b981;
+  text-decoration: underline;
+  text-decoration-color: #10b98140;
+  transition: all 0.2s;
+}
+
+.story-content :deep(a:hover) {
+  color: #059669;
+  text-decoration-color: #059669;
+}
+
+.dark .story-content :deep(a) {
+  color: #6ee7b7;
+}
+
+.dark .story-content :deep(a:hover) {
+  color: #a7f3d0;
+}
+
+/* 表格样式 */
+.story-content :deep(table) {
+  width: 100%;
+  margin: 1.5em 0;
+  border-collapse: collapse;
+}
+
+.story-content :deep(th),
+.story-content :deep(td) {
+  padding: 0.75em 1em;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.dark .story-content :deep(th),
+.dark .story-content :deep(td) {
+  border-color: #374151;
+}
+
+.story-content :deep(th) {
+  background: #f9fafb;
+  font-weight: 600;
+}
+
+.dark .story-content :deep(th) {
+  background: #1f2937;
 }
 </style>
+```
