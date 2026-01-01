@@ -35,7 +35,7 @@ const renderedContent = computed(() => {
 const readingProgress = ref(0)
 
 // 监听滚动,检测是否到达底部
-function handleScroll(event: any) {
+const handleScroll = (event: any) => {
   const target = event.target
   const scrollTop = target.scrollTop
   const scrollHeight = target.scrollHeight
@@ -89,19 +89,6 @@ async function loadStory() {
   }
   finally {
     loading.value = false
-  }
-}
-
-// 监听滚动,检测是否到达底部
-function handleScroll(event: any) {
-  const target = event.target
-  const scrollTop = target.scrollTop
-  const scrollHeight = target.scrollHeight
-  const clientHeight = target.clientHeight
-
-  // 判断是否滚动到底部(留一点余量)
-  if (scrollHeight - scrollTop - clientHeight < 50) {
-    scrolledToBottom.value = true
   }
 }
 
