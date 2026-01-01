@@ -6,3 +6,16 @@ NODE_VERSION = "20"
 
 [functions]
 directory = ".netlify/functions-internal"
+
+# 确保静态 HTML 文件可以被访问
+[[redirects]]
+from = "/admin-stories.html"
+to = "/admin-stories.html"
+status = 200
+force = true
+
+[[redirects]]
+from = "/admin-story-edit.html"
+to = "/admin-story-edit.html"
+status = 200
+force = true
