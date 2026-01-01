@@ -31,6 +31,26 @@ const renderedContent = computed(() => {
   return marked(story.value.content)
 })
 
+// 阅读进度
+const readingProgress = ref(0)
+
+// 监听滚动,检测是否到达底部
+function handleScroll(event: any) {
+  const target = event.target
+  const scrollTop = target.scrollTop
+  const scrollHeight = target.scrollHeight
+  const clientHeight = target.clientHeight
+
+  // 计算阅读进度(0-100)
+  const progress = Math.min(100, Math.round((scrollTop / (scrollHeight - clientHeight)) * 100))
+  readingProgress.value = progress
+
+  // 判断是否滚动到底部(留一点余量)
+  if (scrollHeight - scrollTop - clientHeight < 50) {
+    scrolledToBottom.value = true
+  }
+}
+
 // 加载故事内容
 async function loadStory() {
   loading.value = true
@@ -143,6 +163,14 @@ onMounted(() => {
 
       <!-- 故事内容 -->
       <div v-else-if="story" class="mx-auto max-w-2xl p-6">
+        <!-- 阅读进度条 -->
+        <div class="fixed left-0 right-0 top-0 z-50 h-1 bg-gray-200 dark:bg-gray-700">
+          <div
+            class="h-full from-emerald-500 to-cyan-500 bg-gradient-to-r transition-all duration-300"
+            :style="{ width: `${readingProgress}%` }"
+          />
+        </div>
+
         <!-- 封面 -->
         <div v-if="story.cover" class="mb-6 overflow-hidden rounded-2xl">
           <img :src="story.cover" :alt="story.title" class="w-full">
@@ -152,6 +180,14 @@ onMounted(() => {
         <h1 class="mb-6 text-center text-3xl text-gray-800 font-bold dark:text-gray-100">
           {{ story.title }}
         </h1>
+
+        <!-- 彩蛋提示 -->
+        <div v-if="story.eggs && story.eggs.length > 0" class="mb-6 rounded-xl from-amber-50 to-orange-50 bg-gradient-to-r p-4 text-center dark:from-amber-900/20 dark:to-orange-900/20">
+          <div class="flex items-center justify-center gap-2 text-sm text-amber-700 dark:text-amber-300">
+            <span class="text-lg">🎁</span>
+            <span>本故事包含 <strong class="text-base">{{ story.eggs.length }}</strong> 个彩蛋,读完后寻找吧!</span>
+          </div>
+        </div>
 
         <!-- 内容 -->
         <div class="story-content mb-8" v-html="renderedContent" />
