@@ -1,0 +1,6 @@
+# 静态 HTML 文件优先,不走 Nuxt 路由
+/admin-stories.html  /admin-stories.html  200
+/admin-story-edit.html  /admin-story-edit.html  200
+
+# 其他所有请求走 Nuxt
+/*  /index.html  200
