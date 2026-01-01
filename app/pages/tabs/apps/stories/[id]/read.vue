@@ -35,14 +35,17 @@ const renderedContent = computed(() => {
 const readingProgress = ref(0)
 
 // 监听滚动,检测是否到达底部
-const handleScroll = (event: any) => {
+function handleScroll(event: any) {
   const target = event.target
   const scrollTop = target.scrollTop
   const scrollHeight = target.scrollHeight
   const clientHeight = target.clientHeight
 
-  // 计算阅读进度(0-100)
-  const progress = Math.min(100, Math.round((scrollTop / (scrollHeight - clientHeight)) * 100))
+  // 计算阅读进度(0-100),避免除以零
+  const maxScroll = scrollHeight - clientHeight
+  const progress = maxScroll > 0
+    ? Math.min(100, Math.round((scrollTop / maxScroll) * 100))
+    : 0
   readingProgress.value = progress
 
   // 判断是否滚动到底部(留一点余量)
