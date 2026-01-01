@@ -122,6 +122,13 @@ export default defineNuxtConfig({
       routes: ['/', '/random', '/help', '/user', '/404', '/settings'],
       ignore: ['/hi'],
     },
+    publicAssets: [
+      {
+        baseURL: '/',
+        dir: 'public',
+        maxAge: 0,
+      },
+    ],
   },
 
   eslint: {
